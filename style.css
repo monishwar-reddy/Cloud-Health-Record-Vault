@@ -1,0 +1,147 @@
+/* Deloitte/IBM inspired palette */
+:root {
+  --ink-50: #f6f7f9;
+  --ink-900: #1f2b3a;
+  --accent-500: #0f62fe;
+  --accent-600: #0b5adf;
+  --danger-600: #da1e28;
+  --border-color: #e0e0e0;
+}
+
+/* Reset & Base */
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ink-50);
+  color: var(--ink-900);
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+a {
+  text-decoration: none;
+  color: var(--accent-500);
+}
+a:hover {
+  color: var(--accent-600);
+}
+
+/* Header */
+header {
+  background: #fff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header h1 {
+  font-size: 1.25rem;
+}
+header .subtitle {
+  font-size: 0.75rem;
+  color: #6b6b6b;
+}
+
+/* Buttons */
+button, .btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.btn-primary, button.primary {
+  background: var(--accent-500);
+  color: #fff;
+}
+.btn-primary:hover, button.primary:hover {
+  background: var(--accent-600);
+}
+
+.btn-outline, button.outline {
+  border: 1px solid #ccc;
+  background: #fff;
+}
+.btn-outline:hover, button.outline:hover {
+  background: #f9f9f9;
+}
+
+/* Cards & Containers */
+.card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.card h3 {
+  margin-bottom: 0.5rem;
+}
+
+/* Inputs */
+input[type="file"],
+input[type="text"],
+select {
+  padding: 0.4rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+input[type="file"]:focus,
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent-500);
+}
+
+/* Progress bar */
+.progress {
+  background: #e6e6e6;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--accent-500);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* File list */
+#filesContainer {
+  display: grid;
+  gap: 0.5rem;
+}
+.file-item {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.file-actions button {
+  margin-left: 0.25rem;
+}
+
+/* Footer */
+footer {
+  background: #fff;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: #6b6b6b;
+}
