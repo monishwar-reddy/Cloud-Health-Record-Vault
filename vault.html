@@ -166,12 +166,26 @@
       let uploaded = 0
       for (const f of files) {
         const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { error: upErr } = await supabase.storage.from("health-records").upload(path, f)
-        if (upErr) { alert("Upload error: " + upErr.message); continue }
+        const { data: uploadData, error: upErr } = await supabase.storage.from('health-records').upload(path, f)
 
-        await supabase.from("files").insert({
-          user_id: currentUser.id, name: f.name, size: f.size, path
-        })
+if (upErr) {
+  console.error("Upload failed:", upErr.message)
+  alert("Upload error: " + upErr.message)
+  continue
+}
+
+const { error: dbErr } = await supabase.from('files').insert({
+  user_id: currentUser.id,
+  name: f.name,
+  size: f.size,
+  path
+})
+
+if (dbErr) {
+  console.error("DB insert failed:", dbErr.message)
+  alert("Database error: " + dbErr.message)
+}
+
         uploaded++
         const pct = Math.round((uploaded / files.length) * 100)
         progressBar.style.width = pct + "%"
