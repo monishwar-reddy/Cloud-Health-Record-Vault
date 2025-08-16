@@ -1,132 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vault</title>
-  <style>
-    /* Background Gradient */
-    body {
+ body {
       margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #243b55);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #0f2027);
       background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      color: #f4f4f4;
+      animation: gradientBG 12s ease infinite;
+      color: #e6eef5;
       display: flex;
-      flex-direction: row;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    /* Left content area */
-    .content {
+    /* Layout */
+    .container {
       flex: 1;
       padding: 40px;
+      max-width: 700px;
     }
-
-    /* Heading */
     h1 {
       text-align: center;
-      margin-bottom: 30px;
-      font-size: 2.8em;
-      background: linear-gradient(90deg, #00c6ff, #00ff95);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: glowPulse 3s infinite;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #00c6ff;
+      text-shadow: 0 0 15px rgba(0,198,255,0.7);
     }
-    @keyframes glowPulse {
-      0% { text-shadow: 0 0 6px #00c6ff; }
-      50% { text-shadow: 0 0 18px #00ff95; }
-      100% { text-shadow: 0 0 6px #00c6ff; }
+    .auth, .upload, .search {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-
-    /* Buttons */
+    input[type="file"], input[type="text"], select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e6eef5;
+      padding: 8px;
+      border-radius: 6px;
+    }
+    input::placeholder { color: #aaa; }
     .btn {
-      padding: 10px 20px;
+      padding: 8px 18px;
       border: none;
       border-radius: 25px;
       background: linear-gradient(45deg, #00c6ff, #0072ff);
       color: white;
       cursor: pointer;
-      margin: 6px;
-      transition: 0.3s;
-      font-weight: bold;
+      transition: transform 0.2s;
     }
-    .btn:hover { transform: scale(1.05); box-shadow: 0px 0px 15px rgba(0,198,255,0.7); }
-    .hidden { display: none; }
-
-    /* Upload box */
-    .upload-box {
-      background: rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    input[type="file"] {
-      margin: 10px 0;
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      background: rgba(0,0,0,0.5);
-      color: #00eaff;
-    }
-    select, input[type="text"] {
-      padding: 8px;
-      border-radius: 8px;
-      border: none;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-    }
-
-    /* Progress bar */
-    #progressWrap { margin-top: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; }
-    #progressBar { background: linear-gradient(90deg, #00c6ff, #00ff95); height: 8px; width: 0%; }
-
-    /* File list */
+    .btn:hover { transform: scale(1.05); }
     .file-card {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
       border-radius: 10px;
       padding: 15px;
-      margin: 12px 0;
+      margin: 10px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.4s ease;
     }
-    .file-info strong { color: #00e6ff; }
-    .file-actions button { margin-left: 6px; }
-
-    /* Right side animation container */
-    .animation {
-      flex: 1;
-      background: transparent;
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(10px);}
+      to {opacity:1; transform:translateY(0);}
     }
-    canvas { display: block; width: 100%; height: 100vh; }
+    #progressWrap {
+      margin-top: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    #progressBar {
+      height: 6px;
+      width: 0%;
+      background: #00c6ff;
+    }
+    /* 3D DNA Animation */
+    .dna {
+      width: 45%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    .helix {
+      position: relative;
+      width: 200px;
+      height: 400px;
+      transform-style: preserve-3d;
+      animation: spin 10s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    .dot {
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #00c6ff;
+      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff;
+    }
   </style>
 </head>
 <body>
-  <div class="content">
+  <div class="container">
     <h1>Vault</h1>
-    <div style="text-align:center;">
+
+    <!-- Auth -->
+    <div class="auth">
       <button id="loginBtn" class="btn">Login with Google</button>
       <button id="logoutBtn" class="btn hidden">Logout</button>
-      <p id="userBadge" class="hidden"></p>
+      <span id="userBadge"></span>
     </div>
 
-    <div class="upload-box">
+    <!-- Upload -->
+    <div class="upload">
       <input type="file" id="fileInput" multiple>
       <button id="uploadBtn" class="btn">Upload</button>
-      <div id="progressWrap" class="hidden">
-        <div id="progressBar"></div>
-        <p id="progressText"></p>
-      </div>
     </div>
 
-    <div class="search-filter">
+    <!-- Progress -->
+    <div id="progressWrap" class="hidden">
+      <div id="progressBar"></div>
+      <p id="progressText"></p>
+    </div>
+
+    <!-- Search -->
+    <div class="search">
       <input type="text" id="searchInput" placeholder="Search files…">
       <select id="typeFilter">
         <option value="all">All</option>
@@ -140,114 +144,160 @@
     <div id="filesContainer"></div>
   </div>
 
-  <!-- 3D Animation on right side -->
-  <div class="animation">
-    <canvas id="dnaCanvas"></canvas>
+  <!-- DNA Helix -->
+  <div class="dna">
+    <div class="helix" id="helix"></div>
   </div>
 
-  <!-- Supabase + Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <!-- Script -->
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    const loginBtn = document.getElementById('loginBtn')
-    const logoutBtn = document.getElementById('logoutBtn')
-    const userBadge = document.getElementById('userBadge')
-    const fileInput = document.getElementById('fileInput')
-    const uploadBtn = document.getElementById('uploadBtn')
-    const progressWrap = document.getElementById('progressWrap')
-    const progressBar = document.getElementById('progressBar')
-    const progressText = document.getElementById('progressText')
-    const filesContainer = document.getElementById('filesContainer')
-    const fileCount = document.getElementById('fileCount')
-    const searchInput = document.getElementById('searchInput')
-    const typeFilter = document.getElementById('typeFilter')
+    const loginBtn=document.getElementById('loginBtn')
+    const logoutBtn=document.getElementById('logoutBtn')
+    const userBadge=document.getElementById('userBadge')
+    const fileInput=document.getElementById('fileInput')
+    const uploadBtn=document.getElementById('uploadBtn')
+    const progressWrap=document.getElementById('progressWrap')
+    const progressBar=document.getElementById('progressBar')
+    const progressText=document.getElementById('progressText')
+    const filesContainer=document.getElementById('filesContainer')
+    const fileCount=document.getElementById('fileCount')
+    const searchInput=document.getElementById('searchInput')
+    const typeFilter=document.getElementById('typeFilter')
 
-    let currentUser = null
-    let allFiles = []
+    let currentUser=null, allFiles=[]
 
-    // --- AUTH ---
-    loginBtn.addEventListener('click', async () => {
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
+    loginBtn.addEventListener('click',async()=>{
+      await supabase.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo:window.location.href}
+      })
     })
-    logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); currentUser=null; updateHeader(); renderFiles([]) })
-    supabase.auth.onAuthStateChange(async (_, session) => { currentUser = session?.user||null; updateHeader(); if(currentUser) await loadFiles() })
-    function updateHeader(){ if(currentUser){userBadge.textContent=`Signed in as ${currentUser.email}`;userBadge.classList.remove('hidden');loginBtn.classList.add('hidden');logoutBtn.classList.remove('hidden')} else {userBadge.classList.add('hidden');loginBtn.classList.remove('hidden');logoutBtn.classList.add('hidden')}}
+    logoutBtn.addEventListener('click',async()=>{
+      await supabase.auth.signOut()
+      currentUser=null; updateHeader(); renderFiles([])
+    })
+    supabase.auth.onAuthStateChange(async(_,session)=>{
+      currentUser=session?.user||null
+      updateHeader(); if(currentUser) await loadFiles()
+    })
 
-    // --- UPLOAD ---
-    uploadBtn.addEventListener('click', async () => {
-      const files = fileInput.files
-      if (!currentUser) return alert("Please sign in.")
-      if (!files.length) return alert("Choose file(s).")
+    function updateHeader(){
+      if(currentUser){
+        userBadge.textContent=`Signed in as ${currentUser.email}`
+        loginBtn.style.display='none'
+        logoutBtn.style.display='inline-block'
+      } else {
+        userBadge.textContent=''
+        loginBtn.style.display='inline-block'
+        logoutBtn.style.display='none'
+      }
+    }
+
+    uploadBtn.addEventListener('click',async()=>{
+      const files=fileInput.files
+      if(!currentUser) return alert('Please sign in first.')
+      if(!files.length) return alert('Choose file(s) first.')
 
       progressWrap.classList.remove('hidden')
-      let uploaded = 0
-      for (const f of files) {
-        const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { error: upErr } = await supabase.storage.from('health-records').upload(path, f)
-        if (upErr) { alert("Upload error: "+upErr.message); continue }
-        await supabase.from('files').insert({ user_id: currentUser.id, name: f.name, size: f.size, path })
+      progressBar.style.width='0%'
+      progressText.textContent=`Uploading ${files.length} file(s)…`
+
+      let uploaded=0
+      for(const f of files){
+        const path=`${currentUser.id}/${Date.now()}_${f.name}`
+        const {error:upErr}=await supabase.storage.from('health-records').upload(path,f)
+        if(upErr){alert('Upload error: '+upErr.message);continue}
+        await supabase.from('files').insert({
+          user_id:currentUser.id, name:f.name, size:f.size, path
+        })
         uploaded++
-        progressBar.style.width = (uploaded/files.length*100)+"%"
-        progressText.textContent = `Uploaded ${uploaded}/${files.length}`
+        progressBar.style.width=(uploaded/files.length*100)+'%'
+        progressText.textContent=`Uploaded ${uploaded}/${files.length}`
       }
-      fileInput.value = ""
-      setTimeout(()=>progressWrap.classList.add('hidden'),1000)
+      fileInput.value=''
+      setTimeout(()=>progressWrap.classList.add('hidden'),800)
       await loadFiles()
     })
 
     async function loadFiles(){
-      const { data } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at',{ascending:false})
-      allFiles = data||[]; renderFiles(allFiles)
+      const {data,error}=await supabase.from('files')
+        .select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false})
+      if(error) return console.error(error)
+      allFiles=data||[]; renderFiles(allFiles)
     }
-
-    function extToType(n){n=n.toLowerCase();if(n.endsWith('.pdf'))return 'pdf';if(n.match(/\.(jpg|jpeg|png|webp)$/))return 'image';if(n.match(/\.(doc|docx)$/))return 'doc';return 'other'}
-    function humanKB(b){if(!b)return'';if(b<1024)return`${b} B`;let kb=b/1024;if(kb<1024)return`${kb.toFixed(1)} KB`;return`${(kb/1024).toFixed(1)} MB`}
-
+    function extToType(name){
+      const n=name.toLowerCase()
+      if(n.endsWith('.pdf')) return 'pdf'
+      if(n.match(/\.(jpg|jpeg|png|webp)$/)) return 'image'
+      if(n.match(/\.(doc|docx)$/)) return 'doc'
+      return 'other'
+    }
     function renderFiles(list){
-      const q=(searchInput.value||'').toLowerCase();const filter=typeFilter.value
-      const filtered=list.filter(f=>{let t=extToType(f.name);return((filter==='all')||(t===filter))&&f.name.toLowerCase().includes(q)})
-      filesContainer.innerHTML='';fileCount.textContent=`${filtered.length} file(s)`
-      if(!filtered.length){filesContainer.innerHTML='<p>No files.</p>';return}
+      const q=(searchInput.value||'').toLowerCase()
+      const filter=typeFilter.value
+      const filtered=list.filter(f=>{
+        const t=extToType(f.name)
+        return (filter==='all'||t===filter)&&f.name.toLowerCase().includes(q)
+      })
+      filesContainer.innerHTML=''
+      fileCount.textContent=`${filtered.length} file(s)`
+      if(!filtered.length){filesContainer.innerHTML='<p style="color:#aaa">No files found.</p>';return}
       for(const f of filtered){
-        const div=document.createElement('div');div.className='file-card'
-        div.innerHTML=`<div class="file-info"><strong>${f.name}</strong><br><small>${humanKB(f.size)}</small></div>
-        <div class="file-actions">
-          <button class="btn-open btn" data-path="${f.path}">Open</button>
-          <button class="btn-copy btn" data-path="${f.path}">Copy</button>
-          <button class="btn-del btn" data-id="${f.id}" data-path="${f.path}">Delete</button>
-        </div>`
-        filesContainer.appendChild(div)
+        const row=document.createElement('div')
+        row.className='file-card'
+        row.innerHTML=`
+          <div>
+            <strong>${f.name}</strong><br>
+            <small>${(f.size/1024).toFixed(1)} KB • ${new Date(f.created_at).toLocaleString()}</small>
+          </div>
+          <div>
+            <button class="btn-open btn" data-path="${f.path}">Open</button>
+            <button class="btn-copy btn" data-path="${f.path}">Copy</button>
+            <button class="btn-del btn" data-id="${f.id}" data-path="${f.path}">Delete</button>
+          </div>`
+        filesContainer.appendChild(row)
       }
-      document.querySelectorAll('.btn-open').forEach(b=>b.onclick=async e=>{const {data}=await supabase.storage.from('health-records').createSignedUrl(e.target.dataset.path,3600);if(data?.signedUrl)window.open(data.signedUrl)})
-      document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=async e=>{const {data}=await supabase.storage.from('health-records').createSignedUrl(e.target.dataset.path,3600);if(data?.signedUrl){await navigator.clipboard.writeText(data.signedUrl);alert("Link copied!")}})
-      document.querySelectorAll('.btn-del').forEach(b=>b.onclick=async e=>{if(!confirm("Delete?"))return;await supabase.storage.from('health-records').remove([e.target.dataset.path]);await supabase.from('files').delete().eq('id',e.target.dataset.id);await loadFiles()})
+      document.querySelectorAll('.btn-open').forEach(b=>b.onclick=async e=>{
+        const path=e.target.dataset.path
+        const {data}=await supabase.storage.from('health-records').createSignedUrl(path,3600)
+        if(data?.signedUrl) window.open(data.signedUrl,'_blank')
+      })
+      document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=async e=>{
+        const path=e.target.dataset.path
+        const {data}=await supabase.storage.from('health-records').createSignedUrl(path,3600)
+        if(data?.signedUrl){await navigator.clipboard.writeText(data.signedUrl);alert('Link copied')}
+      })
+      document.querySelectorAll('.btn-del').forEach(b=>b.onclick=async e=>{
+        const id=e.target.dataset.id, path=e.target.dataset.path
+        if(!confirm('Delete file?')) return
+        await supabase.storage.from('health-records').remove([path])
+        await supabase.from('files').delete().eq('id',id)
+        allFiles=allFiles.filter(x=>x.id!==id); renderFiles(allFiles)
+      })
     }
-
     searchInput.oninput=()=>renderFiles(allFiles)
     typeFilter.onchange=()=>renderFiles(allFiles)
-    ;(async()=>{const {data:{session}}=await supabase.auth.getSession();currentUser=session?.user||null;updateHeader();if(currentUser)await loadFiles()})()
 
-    // --- 3D DNA Animation (simple helix) ---
-    const canvas=document.getElementById("dnaCanvas")
-    const renderer=new THREE.WebGLRenderer({canvas,alpha:true})
-    renderer.setSize(window.innerWidth/2,window.innerHeight)
-    const scene=new THREE.Scene()
-    const camera=new THREE.PerspectiveCamera(45,window.innerWidth/(2*window.innerHeight),0.1,1000)
-    camera.position.z=30
-    const group=new THREE.Group()
-    for(let i=0;i<50;i++){
-      let geom=new THREE.SphereGeometry(0.3,16,16)
-      let mat=new THREE.MeshBasicMaterial({color:(i%2==0?"#00e6ff":"#00ff95")})
-      let mesh=new THREE.Mesh(geom,mat)
-      mesh.position.x=Math.sin(i*0.3)*5
-      mesh.position.y=i*0.5-12
-      mesh.position.z=Math.cos(i*0.3)*5
-      group.add(mesh)
+    ;(async()=>{
+      const {data:{session}}=await supabase.auth.getSession()
+      currentUser=session?.user||null
+      updateHeader(); if(currentUser) await loadFiles()
+    })()
+
+    // DNA dots
+    const helix=document.getElementById('helix')
+    for(let i=0;i<40;i++){
+      const dot=document.createElement('div')
+      dot.className='dot'
+      const angle=i*18
+      const y=i*10
+      dot.style.transform=`rotateY(${angle}deg) translateZ(80px) translateY(${y}px)`
+      helix.appendChild(dot)
     }
-    scene.add(group)
-    function animate(){requestAnimationFrame(animate);group.rotation.y+=0.01;renderer.render(scene,camera)}
-    animate()
   </script>
+</body>
+</html>
