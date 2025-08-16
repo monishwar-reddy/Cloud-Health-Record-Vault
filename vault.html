@@ -166,7 +166,10 @@
       let uploaded = 0
       for (const f of files) {
         const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { data: uploadData, error: upErr } = await supabase.storage.from('health-records').upload(path, f)
+        const { data: uploadData, error: upErr } = await supabase
+  .storage
+  .from('health-records')   // bucket name must match Supabase
+  .upload(path, f)
 
 if (upErr) {
   console.error("Upload failed:", upErr.message)
@@ -174,6 +177,7 @@ if (upErr) {
   continue
 }
 
+// Insert metadata into files table
 const { error: dbErr } = await supabase.from('files').insert({
   user_id: currentUser.id,
   name: f.name,
@@ -185,6 +189,7 @@ if (dbErr) {
   console.error("DB insert failed:", dbErr.message)
   alert("Database error: " + dbErr.message)
 }
+
 
         uploaded++
         const pct = Math.round((uploaded / files.length) * 100)
