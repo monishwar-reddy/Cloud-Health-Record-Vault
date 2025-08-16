@@ -4,132 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cloud Health Record Vault</title>
-  <style>
-    /* ======================
-       Modern Deloitte/IBM Style
-       ====================== */
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      overflow-x: hidden;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: {
+            50: '#f7f9fb',
+            100: '#edf1f7',
+            200: '#d7dee8',
+            300: '#b7c2d4',
+            400: '#8e9eb8',
+            500: '#65748a',
+            600: '#4b5c72',
+            700: '#35455c',
+            800: '#232f44',
+            900: '#121b2d'
+          },
+          accent: {
+            500: '#0f62fe', // IBM blue
+            600: '#0043ce',
+            700: '#002d9c'
+          },
+          success: {
+            500: '#198038' // Deloitte green
+          },
+          danger: {
+            500: '#da1e28' // IBM red
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif']
+        },
+        boxShadow: {
+          soft: '0 6px 20px rgba(0,0,0,0.08)',
+          card: '0 12px 40px rgba(0,0,0,0.1)'
+        },
+        borderRadius: {
+          xl2: '1.25rem',
+          pill: '9999px'
+        }
+      }
     }
-
-    /* Header */
-    header {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 15px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.6);
-    }
-
-    header img {
-      height: 45px;
-      margin-right: 15px;
-    }
-
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #00d1ff;
-    }
-
-    /* Main content */
-    main {
-      margin-top: 50px;
-      text-align: center;
-      width: 90%;
-      max-width: 900px;
-    }
-
-    button, input[type="file"] {
-      background: #00d1ff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    button:hover, input[type="file"]:hover {
-      background: #0099cc;
-    }
-
-    .file-list {
-      margin-top: 30px;
-      text-align: left;
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 10px;
-    }
-
-    .file-list h2 {
-      margin-bottom: 15px;
-      font-size: 1.4rem;
-      color: #00d1ff;
-    }
-
-    .file-list ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .file-list li {
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 6px;
-      transition: transform 0.2s;
-    }
-
-    .file-list li:hover {
-      transform: translateX(5px);
-      background: rgba(255,255,255,0.15);
-    }
-
-    /* Animated Background Overlay */
-    .bg-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(0,209,255,0.1) 20%, transparent 70%);
-      background-size: 200% 200%;
-      animation: moveBG 10s infinite linear;
-      z-index: -1;
-    }
-
-    @keyframes moveBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-  </style>
+  }
+</script>
   <link rel="preconnect" href="https://esm.sh" />
 </head>
 <body class="min-h-screen bg-ink-50 text-ink-900">
   <!-- Header -->
-  <header class="navbar">
-    <div class="logo-container">
-      <img src="app.png" alt="Logo" class="logo">
-      <h1 class="brand-name">Cloud Health Record Vault</h1>
+  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-ink-100">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg overflow-hidden">
+        <img src="app.png" alt="Logo" class="h-full w-full object-contain">
+      </div>
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight">
+            Cloud Health Record Vault
+          </h1>
+          <p class="text-xs text-ink-600 -mt-0.5">Provider-agnostic • Patient self-access</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="userBadge" class="hidden text-sm text-ink-700"></span>
+        <button id="loginBtn" class="px-4 py-2 rounded-lg bg-ink-900 text-white hover:bg-ink-800">Sign in with Google</button>
+        <button id="logoutBtn" class="hidden px-4 py-2 rounded-lg border border-ink-300 text-ink-800 hover:bg-ink-100">Sign out</button>
+      </div>
     </div>
   </header>
-  <div class="bg-animation"></div>
+
   <!-- Hero -->
   <section class="relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-white via-ink-50 to-ink-100"></div>
@@ -221,7 +165,7 @@
   <!-- Footer -->
   <footer class="border-t border-ink-100 bg-white">
     <div class="max-w-6xl mx-auto px-4 py-8 text-xs text-ink-600">
-      bulid by Monishwar Reddy Vardireddy
+      Built on Supabase free tier. Keep PHI safe: do not upload sensitive data unless your region and policies allow. You control access and deletion.
     </div>
   </footer>
 
