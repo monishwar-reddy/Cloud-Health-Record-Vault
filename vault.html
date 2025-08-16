@@ -2,166 +2,135 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vault</title>
-  <style>
-  body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #0f2027);
-      background-size: 400% 400%;
-      animation: gradientBG 12s ease infinite;
-      color: #e6eef5;
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Health Record Vault</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: {
+              50: '#f6f7f9', 100: '#eef0f4', 200: '#dfe3ea', 300: '#c9cfdb',
+              400: '#aab3c1', 500: '#8b97a8', 600: '#6b788a', 700: '#515d6e',
+              800: '#364253', 900: '#1f2b3a'
+            },
+            accent: {
+              500: '#0f62fe', 600: '#0b5adf', 700: '#0948ad'
+            },
+            success: { 600: '#0e8a00' },
+            danger: { 600: '#da1e28' }
+          },
+          boxShadow: { soft: '0 10px 30px rgba(0,0,0,0.08)' },
+          borderRadius: { xl2: '1.25rem' }
+        }
+      }
     }
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    /* Layout */
-    .container {
-      flex: 1;
-      padding: 40px;
-      max-width: 700px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-      color: #00c6ff;
-      text-shadow: 0 0 15px rgba(0,198,255,0.7);
-    }
-    .auth, .upload, .search {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    input[type="file"], input[type="text"], select {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #e6eef5;
-      padding: 8px;
-      border-radius: 6px;
-    }
-    input::placeholder { color: #aaa; }
-    .btn {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 25px;
-      background: linear-gradient(45deg, #00c6ff, #0072ff);
-      color: white;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .btn:hover { transform: scale(1.05); }
-    .file-card {
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 15px;
-      margin: 10px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(4px);
-      animation: fadeIn 0.4s ease;
-    }
-    @keyframes fadeIn {
-      from {opacity:0; transform:translateY(10px);}
-      to {opacity:1; transform:translateY(0);}
-    }
-    #progressWrap {
-      margin-top: 10px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    #progressBar {
-      height: 6px;
-      width: 0%;
-      background: #00c6ff;
-    }
-    /* 3D DNA Animation */
-    .dna {
-      width: 45%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      perspective: 1000px;
-    }
-    .helix {
-      position: relative;
-      width: 200px;
-      height: 400px;
-      transform-style: preserve-3d;
-      animation: spin 10s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotateY(0deg); }
-      100% { transform: rotateY(360deg); }
-    }
-    .dot {
-      position: absolute;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: #00c6ff;
-      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff;
-    }
-  </style>
+  </script>
+  <link rel="preconnect" href="https://esm.sh" />
 </head>
-<body>
-  <div class="container">
-    <h1>Vault</h1>
+<body class="min-h-screen bg-ink-50 text-ink-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-ink-100">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-lg bg-accent-500"></div>
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight">Cloud Health Record Vault</h1>
+          <p class="text-xs text-ink-600 -mt-0.5">Provider-agnostic • Patient self-access</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="userBadge" class="hidden text-sm text-ink-700"></span>
+        <button id="loginBtn" class="px-4 py-2 rounded-lg bg-ink-900 text-white hover:bg-ink-800">Sign in with Google</button>
+        <button id="logoutBtn" class="hidden px-4 py-2 rounded-lg border border-ink-300 text-ink-800 hover:bg-ink-100">Sign out</button>
+      </div>
+    </div>
+  </header>
 
-    <!-- Auth -->
-    <div class="auth">
-      <button id="loginBtn" class="btn">Login with Google</button>
-      <button id="logoutBtn" class="btn hidden">Logout</button>
-      <span id="userBadge"></span>
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-white via-ink-50 to-ink-100"></div>
+    <div class="max-w-6xl mx-auto px-4 py-10 relative">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-semibold leading-tight text-ink-900">
+            Your health records, unified. Secure. Always available.
+          </h2>
+          <p class="mt-3 text-ink-700">
+            Upload lab reports, prescriptions, scans, and share time-limited links with doctors. Built on Supabase free tier.
+          </p>
+          <div class="mt-5 flex gap-3">
+            <a href="#vault" class="px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600">Open Vault</a>
+            <a href="#features" class="px-4 py-2 rounded-lg border border-ink-300 hover:bg-white">Learn more</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vault -->
+  <main id="vault" class="max-w-6xl mx-auto px-4 pb-16 space-y-8">
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Upload Card -->
+      <section class="lg:col-span-2 rounded-xl2 shadow-soft bg-white border border-ink-100">
+        <div class="p-5 border-b border-ink-100 flex items-center justify-between">
+          <h3 class="text-lg font-semibold">Upload health records</h3>
+          <span id="quotaNote" class="text-xs text-ink-600">Free tier • Keep under 1GB</span>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <input id="fileInput" type="file" multiple class="block w-full text-sm text-ink-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ink-900 file:text-white hover:file:bg-ink-800" />
+            <button id="uploadBtn" class="px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600">Upload</button>
+          </div>
+          <div id="progressWrap" class="hidden">
+            <div class="h-2 w-full bg-ink-100 rounded-full overflow-hidden">
+              <div id="progressBar" class="h-2 bg-accent-500 w-0"></div>
+            </div>
+            <p id="progressText" class="mt-1 text-xs text-ink-700">Preparing…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <aside class="rounded-xl2 shadow-soft bg-white border border-ink-100 p-5 space-y-4">
+        <h3 class="text-lg font-semibold">Find files</h3>
+        <input id="searchInput" type="text" placeholder="Search by name…" class="w-full rounded-lg border border-ink-200 px-3 py-2" />
+        <select id="typeFilter" class="w-full rounded-lg border border-ink-200 px-3 py-2">
+          <option value="all">All types</option>
+          <option value="pdf">PDF</option>
+          <option value="image">Images</option>
+          <option value="doc">DOC/DOCX</option>
+          <option value="other">Other</option>
+        </select>
+      </aside>
     </div>
 
-    <!-- Upload -->
-    <div class="upload">
-      <input type="file" id="fileInput" multiple>
-      <button id="uploadBtn" class="btn">Upload</button>
+    <!-- Files List -->
+    <section class="rounded-xl2 shadow-soft bg-white border border-ink-100">
+      <div class="p-5 border-b border-ink-100 flex items-center justify-between">
+        <h3 class="text-lg font-semibold">My files</h3>
+        <span id="fileCount" class="text-sm text-ink-700"></span>
+      </div>
+      <div id="filesContainer" class="p-2 divide-y divide-ink-100"></div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-ink-100 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-8 text-xs text-ink-600">
+      Built on Supabase free tier. Keep PHI safe: do not upload sensitive data unless your region and policies allow. You control access and deletion.
     </div>
+  </footer>
 
-    <!-- Progress -->
-    <div id="progressWrap" class="hidden">
-      <div id="progressBar"></div>
-      <p id="progressText"></p>
-    </div>
-
-    <!-- Search -->
-    <div class="search">
-      <input type="text" id="searchInput" placeholder="Search files…">
-      <select id="typeFilter">
-        <option value="all">All</option>
-        <option value="pdf">PDF</option>
-        <option value="image">Image</option>
-        <option value="doc">Doc</option>
-      </select>
-    </div>
-
-    <div id="fileCount"></div>
-    <div id="filesContainer"></div>
-  </div>
-
-  <!-- DNA Helix -->
-  <div class="dna">
-    <div class="helix" id="helix"></div>
-  </div>
-
-  <!-- Script -->
+  <!-- Supabase Logic -->
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI";
+    const SUPABASE_URL = "https://zmozpigwpfiibykixdjk.supabase.co"
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI"
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+    // UI
     const loginBtn=document.getElementById('loginBtn')
     const logoutBtn=document.getElementById('logoutBtn')
     const userBadge=document.getElementById('userBadge')
@@ -177,50 +146,48 @@
 
     let currentUser=null, allFiles=[]
 
-    loginBtn.addEventListener('click',async()=>{
+    loginBtn.onclick=async()=>{
       await supabase.auth.signInWithOAuth({
         provider:'google',
         options:{redirectTo:window.location.href}
       })
-    })
-    logoutBtn.addEventListener('click',async()=>{
+    }
+    logoutBtn.onclick=async()=>{
       await supabase.auth.signOut()
       currentUser=null; updateHeader(); renderFiles([])
-    })
+    }
     supabase.auth.onAuthStateChange(async(_,session)=>{
       currentUser=session?.user||null
       updateHeader(); if(currentUser) await loadFiles()
     })
-
     function updateHeader(){
       if(currentUser){
         userBadge.textContent=`Signed in as ${currentUser.email}`
-        loginBtn.style.display='none'
-        logoutBtn.style.display='inline-block'
+        userBadge.classList.remove('hidden')
+        loginBtn.classList.add('hidden')
+        logoutBtn.classList.remove('hidden')
       } else {
-        userBadge.textContent=''
-        loginBtn.style.display='inline-block'
-        logoutBtn.style.display='none'
+        userBadge.classList.add('hidden')
+        loginBtn.classList.remove('hidden')
+        logoutBtn.classList.add('hidden')
       }
     }
 
-    uploadBtn.addEventListener('click',async()=>{
+    uploadBtn.onclick=async()=>{
       const files=fileInput.files
       if(!currentUser) return alert('Please sign in first.')
-      if(!files.length) return alert('Choose file(s) first.')
+      if(!files.length) return alert('Choose file(s).')
 
       progressWrap.classList.remove('hidden')
       progressBar.style.width='0%'
-      progressText.textContent=`Uploading ${files.length} file(s)…`
+      progressText.textContent=`Uploading ${files.length}…`
 
       let uploaded=0
       for(const f of files){
         const path=`${currentUser.id}/${Date.now()}_${f.name}`
         const {error:upErr}=await supabase.storage.from('health-records').upload(path,f)
         if(upErr){alert('Upload error: '+upErr.message);continue}
-        await supabase.from('files').insert({
-          user_id:currentUser.id, name:f.name, size:f.size, path
-        })
+        await supabase.from('files').insert({user_id:currentUser.id,name:f.name,size:f.size,path})
         uploaded++
         progressBar.style.width=(uploaded/files.length*100)+'%'
         progressText.textContent=`Uploaded ${uploaded}/${files.length}`
@@ -228,11 +195,10 @@
       fileInput.value=''
       setTimeout(()=>progressWrap.classList.add('hidden'),800)
       await loadFiles()
-    })
+    }
 
     async function loadFiles(){
-      const {data,error}=await supabase.from('files')
-        .select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false})
+      const {data,error}=await supabase.from('files').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false})
       if(error) return console.error(error)
       allFiles=data||[]; renderFiles(allFiles)
     }
@@ -252,59 +218,40 @@
       })
       filesContainer.innerHTML=''
       fileCount.textContent=`${filtered.length} file(s)`
-      if(!filtered.length){filesContainer.innerHTML='<p style="color:#aaa">No files found.</p>';return}
+      if(!filtered.length){filesContainer.innerHTML='<div class="p-6 text-ink-600 text-sm">No files found.</div>';return}
       for(const f of filtered){
         const row=document.createElement('div')
-        row.className='file-card'
+        row.className='flex items-center justify-between p-3 hover:bg-ink-50'
         row.innerHTML=`
           <div>
-            <strong>${f.name}</strong><br>
-            <small>${(f.size/1024).toFixed(1)} KB • ${new Date(f.created_at).toLocaleString()}</small>
+            <div class="font-medium">${f.name}</div>
+            <div class="text-xs text-ink-600">${(f.size/1024).toFixed(1)} KB • ${new Date(f.created_at).toLocaleString()}</div>
           </div>
-          <div>
-            <button class="btn-open btn" data-path="${f.path}">Open</button>
-            <button class="btn-copy btn" data-path="${f.path}">Copy</button>
-            <button class="btn-del btn" data-id="${f.id}" data-path="${f.path}">Delete</button>
+          <div class="flex gap-2">
+            <button class="btn-open px-3 py-1.5 bg-ink-900 text-white rounded">Open</button>
+            <button class="btn-copy px-3 py-1.5 border border-ink-300 rounded">Copy</button>
+            <button class="btn-del px-3 py-1.5 bg-danger-600 text-white rounded">Delete</button>
           </div>`
         filesContainer.appendChild(row)
+        row.querySelector('.btn-open').onclick=async()=>{
+          const {data}=await supabase.storage.from('health-records').createSignedUrl(f.path,3600)
+          if(data?.signedUrl) window.open(data.signedUrl,'_blank')
+        }
+        row.querySelector('.btn-copy').onclick=async()=>{
+          const {data}=await supabase.storage.from('health-records').createSignedUrl(f.path,3600)
+          if(data?.signedUrl){await navigator.clipboard.writeText(data.signedUrl);alert('Link copied')}
+        }
+        row.querySelector('.btn-del').onclick=async()=>{
+          if(!confirm('Delete?')) return
+          await supabase.storage.from('health-records').remove([f.path])
+          await supabase.from('files').delete().eq('id',f.id)
+          allFiles=allFiles.filter(x=>x.id!==f.id); renderFiles(allFiles)
+        }
       }
-      document.querySelectorAll('.btn-open').forEach(b=>b.onclick=async e=>{
-        const path=e.target.dataset.path
-        const {data}=await supabase.storage.from('health-records').createSignedUrl(path,3600)
-        if(data?.signedUrl) window.open(data.signedUrl,'_blank')
-      })
-      document.querySelectorAll('.btn-copy').forEach(b=>b.onclick=async e=>{
-        const path=e.target.dataset.path
-        const {data}=await supabase.storage.from('health-records').createSignedUrl(path,3600)
-        if(data?.signedUrl){await navigator.clipboard.writeText(data.signedUrl);alert('Link copied')}
-      })
-      document.querySelectorAll('.btn-del').forEach(b=>b.onclick=async e=>{
-        const id=e.target.dataset.id, path=e.target.dataset.path
-        if(!confirm('Delete file?')) return
-        await supabase.storage.from('health-records').remove([path])
-        await supabase.from('files').delete().eq('id',id)
-        allFiles=allFiles.filter(x=>x.id!==id); renderFiles(allFiles)
-      })
     }
     searchInput.oninput=()=>renderFiles(allFiles)
     typeFilter.onchange=()=>renderFiles(allFiles)
-
-    ;(async()=>{
-      const {data:{session}}=await supabase.auth.getSession()
-      currentUser=session?.user||null
-      updateHeader(); if(currentUser) await loadFiles()
-    })()
-
-    // DNA dots
-    const helix=document.getElementById('helix')
-    for(let i=0;i<40;i++){
-      const dot=document.createElement('div')
-      dot.className='dot'
-      const angle=i*18
-      const y=i*10
-      dot.style.transform=`rotateY(${angle}deg) translateZ(80px) translateY(${y}px)`
-      helix.appendChild(dot)
-    }
+    ;(async()=>{const {data:{session}}=await supabase.auth.getSession();currentUser=session?.user||null;updateHeader();if(currentUser) await loadFiles()})()
   </script>
 </body>
 </html>
