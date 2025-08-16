@@ -328,41 +328,35 @@
       // Wire actions
       // OPEN
 document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
-  const path = e.currentTarget.dataset.path
-  console.log("Opening file:", path)
-  const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600)
-  if (error) return alert("Open failed: " + error.message)
-  if (data?.signedUrl) window.open(data.signedUrl, "_blank")
-}))
+        const path = e.currentTarget.getAttribute('data-path')
+        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60) // 1 hour
+        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+      }))
 
-// COPY
-document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
-  const path = e.currentTarget.dataset.path
-  console.log("Copying link for:", path)
-  const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600)
-  if (error) return alert("Copy failed: " + error.message)
-  if (data?.signedUrl) {
-    await navigator.clipboard.writeText(data.signedUrl)
-    alert("Copied share link ✅")
-  }
-}))
+      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
+        const path = e.currentTarget.getAttribute('data-path')
+        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
+        if (data?.signedUrl) {
+          await navigator.clipboard.writeText(data.signedUrl)
+          alert('Share link copied (valid for 1 hour).')
+        }
+      }))
 
-// DELETE
-document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
-  const id = e.currentTarget.dataset.id
-  const path = e.currentTarget.dataset.path
-  console.log("Deleting file:", id, path)
+      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id')
+        const path = e.currentTarget.getAttribute('data-path')
+        if (!confirm('Delete this file?')) return
 
-  const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-  if (sErr) return alert("Storage delete failed: " + sErr.message)
+        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
+        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
 
-  const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-  if (dErr) return alert("DB delete failed: " + dErr.message)
+        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
+        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
 
-  allFiles = allFiles.filter(f => f.id !== id)
-  renderFiles(allFiles)
-}))
-
+        allFiles = allFiles.filter(x => x.id !== id)
+        renderFiles(allFiles)
+      }))
+    }
 
     // Search & filter wiring
     searchInput.addEventListener('input', () => renderFiles(allFiles))
