@@ -6,30 +6,19 @@
   <title>Cloud Health Record Vault</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Tailwind config for a Deloitte/IBM-like palette
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            ink: {
-              50: '#f6f7f9', 100: '#eef0f4', 200: '#dfe3ea', 300: '#c9cfdb',
-              400: '#aab3c1', 500: '#8b97a8', 600: '#6b788a', 700: '#515d6e',
-              800: '#364253', 900: '#1f2b3a'
-            },
-            accent: {
-              500: '#0f62fe', // IBM-ish blue
-              600: '#0b5adf',
-              700: '#0948ad'
-            },
+            ink: { 50: '#f6f7f9', 100: '#eef0f4', 200: '#dfe3ea', 300: '#c9cfdb',
+                   400: '#aab3c1', 500: '#8b97a8', 600: '#6b788a', 700: '#515d6e',
+                   800: '#364253', 900: '#1f2b3a' },
+            accent: { 500: '#0f62fe', 600: '#0b5adf', 700: '#0948ad' },
             success: { 600: '#0e8a00' },
             danger: { 600: '#da1e28' }
           },
-          boxShadow: {
-            soft: '0 10px 30px rgba(0,0,0,0.08)'
-          },
-          borderRadius: {
-            xl2: '1.25rem'
-          }
+          boxShadow: { soft: '0 10px 30px rgba(0,0,0,0.08)' },
+          borderRadius: { xl2: '1.25rem' }
         }
       }
     }
@@ -42,12 +31,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="h-9 w-9 rounded-lg bg-accent-500"></div>
-        <div>
-          <h1 class="text-xl font-semibold tracking-tight">
-            Cloud Health Record Vault
-          </h1>
-          <p class="text-xs text-ink-600 -mt-0.5">Provider-agnostic • Patient self-access</p>
-        </div>
+        <h1 class="text-xl font-semibold">Cloud Health Record Vault</h1>
       </div>
       <div class="flex items-center gap-3">
         <span id="userBadge" class="hidden text-sm text-ink-700"></span>
@@ -57,85 +41,29 @@
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-white via-ink-50 to-ink-100"></div>
-    <div class="max-w-6xl mx-auto px-4 py-10 relative">
-      <div class="grid md:grid-cols-2 gap-8 items-center">
-        <div>
-          <h2 class="text-3xl md:text-4xl font-semibold leading-tight text-ink-900">
-            Your health records, unified. Secure. Always available.
-          </h2>
-          <p class="mt-3 text-ink-700">
-            Upload lab reports, prescriptions, scans, and share time-limited links with doctors. Built on Supabase free tier.
-          </p>
-          <div class="mt-5 flex gap-3">
-            <a href="#vault" class="px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600">Open Vault</a>
-            <a href="#features" class="px-4 py-2 rounded-lg border border-ink-300 hover:bg-white">Learn more</a>
-          </div>
+  <!-- Vault -->
+  <main class="max-w-6xl mx-auto px-4 py-10 space-y-8">
+    <!-- Upload Card -->
+    <section class="rounded-xl2 shadow-soft bg-white border border-ink-100">
+      <div class="p-5 border-b border-ink-100 flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Upload health records</h3>
+        <span id="quotaNote" class="text-xs text-ink-600">Free tier • Max 1GB</span>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center gap-3">
+          <input id="fileInput" type="file" multiple class="block w-full text-sm text-ink-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-ink-900 file:text-white hover:file:bg-ink-800" />
+          <button id="uploadBtn" class="px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600">Upload</button>
         </div>
-        <div class="rounded-xl2 shadow-soft bg-white p-5 border border-ink-100">
-          <div class="grid grid-cols-3 gap-3 text-center">
-            <div class="p-4 rounded-xl border border-ink-100">
-              <p class="text-xs text-ink-600">Storage</p>
-              <p class="text-lg font-semibold">Private</p>
-            </div>
-            <div class="p-4 rounded-xl border border-ink-100">
-              <p class="text-xs text-ink-600">Share Links</p>
-              <p class="text-lg font-semibold">1 hour</p>
-            </div>
-            <div class="p-4 rounded-xl border border-ink-100">
-              <p class="text-xs text-ink-600">Formats</p>
-              <p class="text-lg font-semibold">PDF/JPG/DOCX</p>
-            </div>
+        <div id="progressWrap" class="hidden">
+          <div class="h-2 w-full bg-ink-100 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-2 bg-accent-500 w-0"></div>
           </div>
+          <p id="progressText" class="mt-1 text-xs text-ink-700">Preparing…</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Vault -->
-  <main id="vault" class="max-w-6xl mx-auto px-4 pb-16 space-y-8">
-    <div class="grid lg:grid-cols-3 gap-6">
-      <!-- Upload Card -->
-      <section class="lg:col-span-2 rounded-xl2 shadow-soft bg-white border border-ink-100">
-        <div class="p-5 border-b border-ink-100 flex items-center justify-between">
-          <h3 class="text-lg font-semibold">Upload health records</h3>
-          <span id="quotaNote" class="text-xs text-ink-600">Free tier • Keep under 1GB</span>
-        </div>
-        <div class="p-5 space-y-4">
-          <div class="flex flex-col md:flex-row md:items-center gap-3">
-            <input id="fileInput" type="file" multiple class="block w-full text-sm text-ink-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ink-900 file:text-white hover:file:bg-ink-800" />
-            <button id="uploadBtn" class="px-4 py-2 rounded-lg bg-accent-500 text-white hover:bg-accent-600">Upload</button>
-          </div>
-          <div id="progressWrap" class="hidden">
-            <div class="h-2 w-full bg-ink-100 rounded-full overflow-hidden">
-              <div id="progressBar" class="h-2 bg-accent-500 w-0"></div>
-            </div>
-            <p id="progressText" class="mt-1 text-xs text-ink-700">Preparing…</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Filters / Info Card -->
-      <aside class="rounded-xl2 shadow-soft bg-white border border-ink-100 p-5 space-y-4">
-        <h3 class="text-lg font-semibold">Find files</h3>
-        <input id="searchInput" type="text" placeholder="Search by name…" class="w-full rounded-lg border border-ink-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-500" />
-        <select id="typeFilter" class="w-full rounded-lg border border-ink-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-500">
-          <option value="all">All types</option>
-          <option value="pdf">PDF</option>
-          <option value="image">Images</option>
-          <option value="doc">DOC/DOCX</option>
-          <option value="other">Other</option>
-        </select>
-        <div class="text-xs text-ink-600">
-          <p>• Files are private to your account.</p>
-          <p>• Share links expire in 1 hour.</p>
-        </div>
-      </aside>
-    </div>
-
-    <!-- Files List -->
+    <!-- File List -->
     <section class="rounded-xl2 shadow-soft bg-white border border-ink-100">
       <div class="p-5 border-b border-ink-100 flex items-center justify-between">
         <h3 class="text-lg font-semibold">My files</h3>
@@ -145,21 +73,20 @@
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-ink-100 bg-white">
-    <div class="max-w-6xl mx-auto px-4 py-8 text-xs text-ink-600">
-      Built on Supabase free tier. Keep PHI safe: do not upload sensitive data unless your region and policies allow. You control access and deletion.
+  <!-- Preview Modal -->
+  <div id="previewModal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl2 shadow-soft max-w-3xl w-full max-h-[90vh] overflow-auto relative">
+      <button id="closePreview" class="absolute top-3 right-3 bg-danger-600 text-white px-3 py-1 rounded">X</button>
+      <div id="previewContent" class="p-6"></div>
     </div>
-  </footer>
+  </div>
 
-  <!-- App Script -->
+  <!-- Supabase Script -->
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-    // TODO: Replace with your Supabase project values
-    const SUPABASE_URL = 'https://zmozpigwpfiibykixdjk.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI'
-
+    const SUPABASE_URL = "https://zmozpigwpfiibykixdjk.supabase.co"
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI"
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     // UI refs
@@ -173,202 +100,109 @@
     const progressText = document.getElementById('progressText')
     const filesContainer = document.getElementById('filesContainer')
     const fileCount = document.getElementById('fileCount')
-    const searchInput = document.getElementById('searchInput')
-    const typeFilter = document.getElementById('typeFilter')
+    const previewModal = document.getElementById('previewModal')
+    const previewContent = document.getElementById('previewContent')
+    const closePreview = document.getElementById('closePreview')
 
     let currentUser = null
     let allFiles = []
 
-    // Auth handlers
+    // Auth
     loginBtn.addEventListener('click', async () => {
-      const redirectTo = window.location.origin
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
+      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
     })
-    logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      currentUser = null
-      updateHeader()
-      renderFiles([])
-    })
+    logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); location.reload() })
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange(async (_evt, session) => {
       currentUser = session?.user || null
-      updateHeader()
-      if (currentUser) await loadFiles()
+      if (currentUser) { userBadge.textContent = currentUser.email; userBadge.classList.remove('hidden'); loginBtn.classList.add('hidden'); logoutBtn.classList.remove('hidden'); loadFiles() }
     })
 
-    async function getUser() {
-      const { data } = await supabase.auth.getUser()
-      return data.user
-    }
-
-    function updateHeader() {
-      if (currentUser) {
-        userBadge.textContent = `Signed in as ${currentUser.email}`
-        userBadge.classList.remove('hidden')
-        loginBtn.classList.add('hidden')
-        logoutBtn.classList.remove('hidden')
-      } else {
-        userBadge.classList.add('hidden')
-        loginBtn.classList.remove('hidden')
-        logoutBtn.classList.add('hidden')
-      }
-    }
-
-    // Upload logic with progress (client-side approximation)
+    // Upload
     uploadBtn.addEventListener('click', async () => {
       const files = fileInput.files
-      if (!currentUser) return alert('Please sign in first.')
-      if (!files || !files.length) return alert('Choose file(s) first.')
-
-      progressWrap.classList.remove('hidden')
-      progressBar.style.width = '0%'
-      progressText.textContent = `Uploading ${files.length} file(s)…`
-
+      if (!files.length) return alert("Choose file(s)")
+      progressWrap.classList.remove("hidden")
       let uploaded = 0
       for (const f of files) {
         const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { error: upErr } = await supabase.storage.from('health-records').upload(path, f)
-        if (upErr) { console.error(upErr); alert('Upload error: '+ upErr.message); continue }
-
-        await supabase.from('files').insert({
-          user_id: currentUser.id,
-          name: f.name,
-          size: f.size,
-          path
-        })
-        uploaded++
-        const pct = Math.round((uploaded / files.length) * 100)
-        progressBar.style.width = pct + '%'
-        progressText.textContent = `Uploaded ${uploaded}/${files.length}`
+        const { error } = await supabase.storage.from("health-records").upload(path, f)
+        if (!error) {
+          await supabase.from("files").insert({ user_id: currentUser.id, name: f.name, size: f.size, path })
+          uploaded++
+          const pct = Math.round((uploaded / files.length) * 100)
+          progressBar.style.width = pct + "%"
+          progressText.textContent = `Uploaded ${uploaded}/${files.length}`
+        }
       }
-
-      fileInput.value = ''
-      setTimeout(()=>{ progressWrap.classList.add('hidden') }, 600)
-      await loadFiles()
+      fileInput.value = ""
+      setTimeout(()=> progressWrap.classList.add("hidden"), 600)
+      loadFiles()
     })
 
+    // Load + render
     async function loadFiles() {
-      const user = await getUser()
-      if (!user) return
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-      if (error) { console.error(error); return }
+      const { data } = await supabase.from("files").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false })
       allFiles = data || []
-      renderFiles(allFiles)
+      fileCount.textContent = `${allFiles.length} file(s)`
+      renderFiles()
     }
 
-    function extToType(name) {
-      const n = name.toLowerCase()
-      if (n.endsWith('.pdf')) return 'pdf'
-      if (n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png') || n.endsWith('.webp')) return 'image'
-      if (n.endsWith('.doc') || n.endsWith('.docx')) return 'doc'
-      return 'other'
-    }
+    function humanKB(bytes){ return (bytes/1024).toFixed(1)+" KB" }
 
-    function fileIcon(type) {
-      const base = 'inline-block align-middle mr-2 h-5 w-5 rounded-sm'
-      if (type === 'pdf') return `<span class="${base} bg-danger-600"></span>`
-      if (type === 'image') return `<span class="${base} bg-accent-500"></span>`
-      if (type === 'doc') return `<span class="${base} bg-ink-700"></span>`
-      return `<span class="${base} bg-ink-300"></span>`
-    }
-
-    function humanKB(bytes) {
-      if (!bytes && bytes !== 0) return ''
-      if (bytes < 1024) return `${bytes} B`
-      const kb = bytes / 1024
-      if (kb < 1024) return `${kb.toFixed(1)} KB`
-      const mb = kb / 1024
-      return `${mb.toFixed(1)} MB`
-    }
-
-    function renderFiles(list) {
-      // Apply search + filter
-      const q = (searchInput.value || '').toLowerCase()
-      const filter = typeFilter.value
-      const filtered = list.filter(f => {
-        const t = extToType(f.name)
-        const byType = (filter === 'all') || (t === filter)
-        const byQuery = f.name.toLowerCase().includes(q)
-        return byType && byQuery
-      })
-
-      filesContainer.innerHTML = ''
-      fileCount.textContent = `${filtered.length} file(s)`
-
-      if (!filtered.length) {
-        filesContainer.innerHTML = `<div class="p-6 text-ink-600 text-sm">No files found.</div>`
-        return
-      }
-
-      for (const f of filtered) {
-        const type = extToType(f.name)
-        const row = document.createElement('div')
-        row.className = 'flex items-center justify-between p-3 hover:bg-ink-50'
+    function renderFiles() {
+      filesContainer.innerHTML = ""
+      for (const f of allFiles) {
+        const row = document.createElement("div")
+        row.className = "flex items-center justify-between p-3 hover:bg-ink-50"
         row.innerHTML = `
-          <div class="flex items-center min-w-0">
-            ${fileIcon(type)}
-            <div class="min-w-0">
-              <div class="font-medium truncate max-w-[52vw]">${f.name}</div>
-              <div class="text-xs text-ink-600">${humanKB(f.size)} • ${new Date(f.created_at).toLocaleString()}</div>
-            </div>
+          <div>
+            <div class="font-medium">${f.name}</div>
+            <div class="text-xs text-ink-600">${humanKB(f.size)}</div>
           </div>
-          <div class="flex items-center gap-2">
-            <button class="btn-open px-3 py-1.5 rounded-lg bg-ink-900 text-white text-sm hover:bg-ink-800" data-path="${f.path}">Open</button>
-            <button class="btn-copy px-3 py-1.5 rounded-lg border border-ink-300 text-sm hover:bg-ink-100" data-path="${f.path}">Copy link</button>
-            <button class="btn-del px-3 py-1.5 rounded-lg bg-danger-600 text-white text-sm hover:opacity-90" data-id="${f.id}" data-path="${f.path}">Delete</button>
+          <div class="flex gap-2">
+            <button class="btn-open bg-accent-500 text-white px-3 py-1 rounded" data-path="${f.path}">Open</button>
+            <button class="btn-copy border border-ink-300 px-3 py-1 rounded" data-path="${f.path}">Copy link</button>
+            <button class="btn-prev bg-ink-900 text-white px-3 py-1 rounded" data-path="${f.path}">Preview</button>
+            <button class="btn-del bg-danger-600 text-white px-3 py-1 rounded" data-id="${f.id}" data-path="${f.path}">Delete</button>
           </div>
         `
         filesContainer.appendChild(row)
       }
 
-      // Wire actions
-      document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60) // 1 hour
-        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
-      }))
-
-      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
+      // Wire buttons
+      document.querySelectorAll(".btn-open").forEach(btn => btn.onclick = async e => {
+        const { data } = await supabase.storage.from("health-records").createSignedUrl(e.target.dataset.path, 3600)
+        if (data?.signedUrl) window.open(data.signedUrl, "_blank")
+      })
+      document.querySelectorAll(".btn-copy").forEach(btn => btn.onclick = async e => {
+        const { data } = await supabase.storage.from("health-records").createSignedUrl(e.target.dataset.path, 3600)
+        if (data?.signedUrl) { navigator.clipboard.writeText(data.signedUrl); alert("Link copied!") }
+      })
+      document.querySelectorAll(".btn-prev").forEach(btn => btn.onclick = async e => {
+        const { data } = await supabase.storage.from("health-records").createSignedUrl(e.target.dataset.path, 3600)
         if (data?.signedUrl) {
-          await navigator.clipboard.writeText(data.signedUrl)
-          alert('Share link copied (valid for 1 hour).')
+          let content = ""
+          if (e.target.dataset.path.endsWith(".jpg") || e.target.dataset.path.endsWith(".png")) {
+            content = `<img src="${data.signedUrl}" class="max-h-[75vh] mx-auto rounded" />`
+          } else if (e.target.dataset.path.endsWith(".pdf")) {
+            content = `<iframe src="${data.signedUrl}" class="w-full h-[75vh]" frameborder="0"></iframe>`
+          } else {
+            content = `<p class="text-center text-ink-700">Preview not available for this file type.</p>`
+          }
+          previewContent.innerHTML = content
+          previewModal.classList.remove("hidden")
         }
-      }))
-
-      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
-        const id = e.currentTarget.getAttribute('data-id')
-        const path = e.currentTarget.getAttribute('data-path')
-        if (!confirm('Delete this file?')) return
-
-        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
-
-        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
-
-        allFiles = allFiles.filter(x => x.id !== id)
-        renderFiles(allFiles)
-      }))
+      })
+      document.querySelectorAll(".btn-del").forEach(btn => btn.onclick = async e => {
+        if (!confirm("Delete file?")) return
+        await supabase.storage.from("health-records").remove([e.target.dataset.path])
+        await supabase.from("files").delete().eq("id", e.target.dataset.id)
+        loadFiles()
+      })
     }
 
-    // Search & filter wiring
-    searchInput.addEventListener('input', () => renderFiles(allFiles))
-    typeFilter.addEventListener('change', () => renderFiles(allFiles))
-
-    // Initialize session on load
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      currentUser = session?.user || null
-      updateHeader()
-      if (currentUser) await loadFiles()
-    })()
+    closePreview.onclick = ()=> previewModal.classList.add("hidden")
   </script>
 </body>
 </html>
