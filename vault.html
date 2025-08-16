@@ -5,89 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vault</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(-45deg, #141e30, #243b55, #141e30, #243b55);
-      background-size: 400% 400%;
-      animation: gradientBG 10s ease infinite;
-      color: white;
-      padding: 40px;
-    }
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    h1 { text-align: center; margin-bottom: 20px; }
-    .file-card {
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 20px;
-      margin: 15px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      animation: fadeIn 0.5s ease-in;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 20px;
-      background: linear-gradient(45deg, #00c6ff, #0072ff);
-      color: white;
-      cursor: pointer;
-      margin: 5px;
-      transition: transform 0.2s;
-    }
-    .btn:hover { transform: scale(1.1); }
-    .hidden { display: none; }
+  body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(-45deg, #141e30, #243b55, #141e30, #243b55);
+  background-size: 400% 400%;
+  animation: gradientBG 10s ease infinite;
+  color: #f4f4f4;
+  padding: 40px;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* Authentication buttons */
+#loginBtn, #logoutBtn {
+  display: inline-block;
+  margin: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+/* File card */
+.file-card {
+  background: rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.file-card strong {
+  font-size: 1rem;
+}
+.file-card small {
+  font-size: 0.75rem;
+  color: #ccc;
+}
+
+/* Inputs */
+input[type="file"], 
+input[type="text"], 
+select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  margin-right: 8px;
+}
+input::placeholder {
+  color: #aaa;
+}
+
+/* Progress bar */
+#progressWrap {
+  margin-top: 15px;
+}
+#progressBar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  transition: width 0.3s ease;
+}
+#progressText {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: #ddd;
+}
   </style>
 </head>
 <body>
-  <h1>Vault</h1>
+ <h1>Vault</h1>
+  <div class="card">
+    <!-- Authentication -->
+    <div style="margin-bottom:20px;">
+      <button id="loginBtn" class="btn">Login with Google</button>
+      <button id="logoutBtn" class="btn hidden">Logout</button>
+      <span id="userBadge" class="hidden"></span>
+    </div>
 
-  <!-- Authentication -->
-  <div>
-    <button id="loginBtn" class="btn">Login with Google</button>
-    <button id="logoutBtn" class="btn hidden">Logout</button>
-    <span id="userBadge" class="hidden"></span>
+    <!-- File Upload -->
+    <div>
+      <input type="file" id="fileInput" multiple>
+      <button id="uploadBtn" class="btn">Upload</button>
+    </div>
+
+    <!-- Progress bar -->
+    <div id="progressWrap" class="hidden">
+      <div id="progressBar"></div>
+      <p id="progressText"></p>
+    </div>
+
+    <!-- Search + filter -->
+    <div style="margin-top:20px;">
+      <input type="text" id="searchInput" placeholder="Search files…">
+      <select id="typeFilter">
+        <option value="all">All</option>
+        <option value="pdf">PDF</option>
+        <option value="image">Image</option>
+        <option value="doc">Doc</option>
+      </select>
+    </div>
+
+    <!-- File list -->
+    <div id="fileCount" style="margin-top:15px;"></div>
+    <div id="filesContainer"></div>
   </div>
-
-  <!-- File upload -->
-  <div>
-    <input type="file" id="fileInput" multiple>
-    <button id="uploadBtn" class="btn">Upload</button>
-  </div>
-
-  <!-- Progress bar -->
-  <div id="progressWrap" class="hidden" style="margin-top:10px;">
-    <div id="progressBar" style="background:#00c6ff;height:6px;width:0%;border-radius:5px;"></div>
-    <p id="progressText"></p>
-  </div>
-
-  <!-- Search & filter -->
-  <div style="margin-top:20px;">
-    <input type="text" id="searchInput" placeholder="Search files…">
-    <select id="typeFilter">
-      <option value="all">All</option>
-      <option value="pdf">PDF</option>
-      <option value="image">Image</option>
-      <option value="doc">Doc</option>
-    </select>
-  </div>
-
-  <!-- File list -->
-  <div id="fileCount" style="margin-top:15px;"></div>
-  <div id="filesContainer"></div>
 
   <!-- Supabase Script -->
   <script type="module">
-    
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     // TODO: Replace with your Supabase project values
@@ -95,7 +152,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI'
  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    // UI refs
+    // Refs
     const loginBtn = document.getElementById('loginBtn')
     const logoutBtn = document.getElementById('logoutBtn')
     const userBadge = document.getElementById('userBadge')
@@ -112,11 +169,13 @@
     let currentUser = null
     let allFiles = []
 
-    // Login/Logout
+    // Login
     loginBtn.addEventListener('click', async () => {
       const redirectTo = window.location.origin + window.location.pathname
       await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
     })
+
+    // Logout
     logoutBtn.addEventListener('click', async () => {
       await supabase.auth.signOut()
       currentUser = null
@@ -143,7 +202,7 @@
       }
     }
 
-    // Upload files
+    // Upload Files
     uploadBtn.addEventListener('click', async () => {
       const files = fileInput.files
       if (!currentUser) return alert('Please sign in first.')
@@ -156,15 +215,29 @@
       let uploaded = 0
       for (const f of files) {
         const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { error: upErr } = await supabase.storage.from('health-records').upload(path, f)
-        if (upErr) { console.error(upErr); alert('Upload error: '+ upErr.message); continue }
+        console.log("Uploading to:", path)
 
-        await supabase.from('files').insert({
+        const { data, error: upErr } = await supabase.storage.from('health-records').upload(path, f)
+
+        if (upErr) { 
+          console.error("Upload failed:", upErr)
+          alert("Upload error: " + upErr.message)
+          continue 
+        } else {
+          console.log("Upload success:", data)
+        }
+
+        // Insert record in DB
+        const { error: dbErr } = await supabase.from('files').insert({
           user_id: currentUser.id,
           name: f.name,
           size: f.size,
           path
         })
+        if (dbErr) {
+          console.error("DB Insert Error:", dbErr)
+          alert("Database insert error: " + dbErr.message)
+        }
 
         uploaded++
         const pct = Math.round((uploaded / files.length) * 100)
@@ -173,22 +246,24 @@
       }
 
       fileInput.value = ''
-      setTimeout(()=>{ progressWrap.classList.add('hidden') }, 600)
+      setTimeout(()=> progressWrap.classList.add('hidden'), 700)
       await loadFiles()
     })
 
-    // Load files
+    // Load Files
     async function loadFiles() {
       const { data, error } = await supabase
         .from('files')
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false })
-      if (error) { console.error(error); return }
+
+      if (error) { console.error("Load error:", error); return }
       allFiles = data || []
       renderFiles(allFiles)
     }
 
+    // Helpers
     function extToType(name) {
       const n = name.toLowerCase()
       if (n.endsWith('.pdf')) return 'pdf'
@@ -198,11 +273,11 @@
     }
 
     function fileIcon(type) {
-      const base = 'inline-block align-middle mr-2 h-5 w-5 rounded-sm'
-      if (type === 'pdf') return `<span class="${base}" style="background:red;"></span>`
-      if (type === 'image') return `<span class="${base}" style="background:green;"></span>`
-      if (type === 'doc') return `<span class="${base}" style="background:blue;"></span>`
-      return `<span class="${base}" style="background:gray;"></span>`
+      const base = 'display:inline-block;margin-right:8px;height:14px;width:14px;border-radius:3px;'
+      if (type === 'pdf') return `<span style="${base}background:red"></span>`
+      if (type === 'image') return `<span style="${base}background:green"></span>`
+      if (type === 'doc') return `<span style="${base}background:blue"></span>`
+      return `<span style="${base}background:gray"></span>`
     }
 
     function humanKB(bytes) {
@@ -214,6 +289,7 @@
       return `${mb.toFixed(1)} MB`
     }
 
+    // Render
     function renderFiles(list) {
       const q = (searchInput.value || '').toLowerCase()
       const filter = typeFilter.value
@@ -244,7 +320,7 @@
           </div>
           <div>
             <button class="btn-open btn" data-path="${f.path}">Open</button>
-            <button class="btn-copy btn" data-path="${f.path}">Copy link</button>
+            <button class="btn-copy btn" data-path="${f.path}">Copy</button>
             <button class="btn-del btn" data-id="${f.id}" data-path="${f.path}">Delete</button>
           </div>
         `
@@ -278,11 +354,11 @@
       }))
     }
 
-    // Search & filter
+    // Filters
     searchInput.addEventListener('input', () => renderFiles(allFiles))
     typeFilter.addEventListener('change', () => renderFiles(allFiles))
 
-    // Initialize session
+    // Init session
     (async () => {
       const { data: { session } } = await supabase.auth.getSession()
       currentUser = session?.user || null
@@ -292,5 +368,4 @@
   </script>
 </body>
 </html>
-    
 
