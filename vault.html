@@ -14,18 +14,12 @@
       color: white;
       padding: 40px;
     }
-
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
+    h1 { text-align: center; margin-bottom: 20px; }
     .file-card {
       background: rgba(255,255,255,0.1);
       border-radius: 10px;
@@ -36,12 +30,10 @@
       align-items: center;
       animation: fadeIn 0.5s ease-in;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     .btn {
       padding: 8px 16px;
       border: none;
@@ -52,14 +44,8 @@
       margin: 5px;
       transition: transform 0.2s;
     }
-
-    .btn:hover {
-      transform: scale(1.1);
-    }
-
-    .hidden {
-      display: none;
-    }
+    .btn:hover { transform: scale(1.1); }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -101,13 +87,13 @@
 
   <!-- Supabase Script -->
   <script type="module">
+    
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     // TODO: Replace with your Supabase project values
     const SUPABASE_URL = 'https://zmozpigwpfiibykixdjk.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI'
-
-     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     // UI refs
     const loginBtn = document.getElementById('loginBtn')
@@ -126,9 +112,9 @@
     let currentUser = null
     let allFiles = []
 
-    // Auth handlers
+    // Login/Logout
     loginBtn.addEventListener('click', async () => {
-      const redirectTo = window.location.origin
+      const redirectTo = window.location.origin + window.location.pathname
       await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
     })
     logoutBtn.addEventListener('click', async () => {
@@ -138,16 +124,11 @@
       renderFiles([])
     })
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange(async (_, session) => {
       currentUser = session?.user || null
       updateHeader()
       if (currentUser) await loadFiles()
     })
-
-    async function getUser() {
-      const { data } = await supabase.auth.getUser()
-      return data.user
-    }
 
     function updateHeader() {
       if (currentUser) {
@@ -162,7 +143,7 @@
       }
     }
 
-    // Upload logic with progress
+    // Upload files
     uploadBtn.addEventListener('click', async () => {
       const files = fileInput.files
       if (!currentUser) return alert('Please sign in first.')
@@ -184,6 +165,7 @@
           size: f.size,
           path
         })
+
         uploaded++
         const pct = Math.round((uploaded / files.length) * 100)
         progressBar.style.width = pct + '%'
@@ -195,13 +177,12 @@
       await loadFiles()
     })
 
+    // Load files
     async function loadFiles() {
-      const user = await getUser()
-      if (!user) return
       const { data, error } = await supabase
         .from('files')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false })
       if (error) { console.error(error); return }
       allFiles = data || []
@@ -270,13 +251,12 @@
         filesContainer.appendChild(row)
       }
 
-      // Wire actions
+      // Actions
       document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
         const path = e.currentTarget.getAttribute('data-path')
         const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 3600)
         if (data?.signedUrl) window.open(data.signedUrl, '_blank')
       }))
-
       document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
         const path = e.currentTarget.getAttribute('data-path')
         const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 3600)
@@ -285,28 +265,24 @@
           alert('Share link copied (valid for 1 hour).')
         }
       }))
-
       document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
         const id = e.currentTarget.getAttribute('data-id')
         const path = e.currentTarget.getAttribute('data-path')
         if (!confirm('Delete this file?')) return
 
-        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
-
-        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
+        await supabase.storage.from('health-records').remove([path])
+        await supabase.from('files').delete().eq('id', id)
 
         allFiles = allFiles.filter(x => x.id !== id)
         renderFiles(allFiles)
       }))
     }
 
-    // Search & filter wiring
+    // Search & filter
     searchInput.addEventListener('input', () => renderFiles(allFiles))
     typeFilter.addEventListener('change', () => renderFiles(allFiles))
 
-    // Initialize session on load
+    // Initialize session
     (async () => {
       const { data: { session } } = await supabase.auth.getSession()
       currentUser = session?.user || null
@@ -316,3 +292,5 @@
   </script>
 </body>
 </html>
+    
+
