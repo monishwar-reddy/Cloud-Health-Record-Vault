@@ -171,23 +171,28 @@
   .from('health-records')   // bucket name must match Supabase
   .upload(path, f)
 
-if (upErr) {
-  console.error("Upload failed:", upErr.message)
-  alert("Upload error: " + upErr.message)
-  continue
+// Add this helper
+async function getUser() {
+  const { data } = await supabase.auth.getUser()
+  return data.user
 }
 
-// Insert metadata into files table
-const { error: dbErr } = await supabase.from('files').insert({
-  user_id: currentUser.id,
-  name: f.name,
-  size: f.size,
-  path
-})
+// Load files (fixed)
+async function loadFiles() {
+  const user = await getUser()
+  if (!user) return
+  const { data, error } = await supabase
+    .from("files")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
 
-if (dbErr) {
-  console.error("DB insert failed:", dbErr.message)
-  alert("Database error: " + dbErr.message)
+  if (error) {
+    console.error("Load files error:", error.message)
+    return
+  }
+  allFiles = data || []
+  renderFiles(allFiles)
 }
 
 
