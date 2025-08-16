@@ -92,29 +92,11 @@
     <h1>Welcome to HealthVault</h1>
     <p>Your secure vault for health documents</p>
     <!-- Google Login Button -->
-    <button id="google-login" class="btn">Sign in with Google</button>
+    
     <a href="vault.html" class="btn">Open Vault</a>
     <a href="contact.html" class="btn">Contact Us</a>
   </div>
 
-  <script type="module">
-    // ✅ Replace with your Supabase project credentials
-    const SUPABASE_URL = "https://zmozpigwpfiibykixdjk.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI";
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    document.getElementById("google-login").addEventListener("click", async () => {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin + "/vault.html" // After login → Vault
-        }
-      });
-      if (error) {
-        console.error("Login error:", error.message);
-      }
-    });
-  </script>
+  
 </body>
 </html>
