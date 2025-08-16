@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vault</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(-45deg, #141e30, #243b55, #141e30, #243b55);
+      background-size: 400% 400%;
+      animation: gradientBG 10s ease infinite;
+      color: white;
+      padding: 40px;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .file-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      background: #00c6ff;
+      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Vault</h1>
+
+  <div class="file-card">
+    <span>Report1.pdf</span>
+    <div>
+      <button class="btn">Copy Link</button>
+      <button class="btn">Open</button>
+      <button class="btn">Delete</button>
+    </div>
+  </div>
+
+  <div class="file-card">
+    <span>Scan2.png</span>
+    <div>
+      <button class="btn">Copy Link</button>
+      <button class="btn">Open</button>
+      <button class="btn">Delete</button>
+    </div>
+  </div>
+
+</body>
+</html>
