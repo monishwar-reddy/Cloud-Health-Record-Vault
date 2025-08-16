@@ -109,8 +109,12 @@
 
     // Auth
     loginBtn.addEventListener('click', async () => {
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } })
-    })
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }  // 👈 stays on same page
+  })
+})
+
     logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); location.reload() })
 
     supabase.auth.onAuthStateChange(async (_evt, session) => {
