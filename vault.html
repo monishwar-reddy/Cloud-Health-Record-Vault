@@ -281,61 +281,77 @@
       return `${mb.toFixed(1)} MB`
     }
 
-   function renderFiles(list) {
-  // ... filtering logic unchanged ...
+  function renderFiles(list) {
+      // Apply search + filter
+      const q = (searchInput.value || '').toLowerCase()
+      const filter = typeFilter.value
+      const filtered = list.filter(f => {
+        const t = extToType(f.name)
+        const byType = (filter === 'all') || (t === filter)
+        const byQuery = f.name.toLowerCase().includes(q)
+        return byType && byQuery
+      })
 
-  filesContainer.innerHTML = ''
-  fileCount.textContent = `${filtered.length} file(s)`
+      filesContainer.innerHTML = ''
+      fileCount.textContent = `${filtered.length} file(s)`
 
-  if (!filtered.length) {
-    filesContainer.innerHTML = `<div class="p-6 text-ink-600 text-sm">No files found.</div>`
-    return
-  }
-
-  for (const f of filtered) {
-    const type = extToType(f.name)
-    const row = document.createElement('div')
-    row.className = 'flex items-center justify-between p-3 hover:bg-ink-50'
-    row.innerHTML = `
-      <div class="flex items-center min-w-0">
-        ${fileIcon(type)}
-        <div class="min-w-0">
-          <div class="font-medium truncate max-w-[52vw]">${f.name}</div>
-          <div class="text-xs text-ink-600">${humanKB(f.size)} • ${new Date(f.created_at).toLocaleString()}</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="btn-open px-3 py-1.5 rounded-lg bg-ink-900 text-white text-sm hover:bg-ink-800" data-path="${f.path}">Open</button>
-        <button class="btn-copy px-3 py-1.5 rounded-lg border border-ink-300 text-sm hover:bg-ink-100" data-path="${f.path}">Copy link</button>
-        <button class="btn-del px-3 py-1.5 rounded-lg bg-danger-600 text-white text-sm hover:opacity-90" data-id="${f.id}" data-path="${f.path}">Delete</button>
-      </div>
-    `
-    filesContainer.appendChild(row)
-
-    // 🔑 Attach event handlers right after row is created
-    row.querySelector('.btn-open').addEventListener('click', async () => {
-      const { data } = await supabase.storage.from('health-records').createSignedUrl(f.path, 3600)
-      if (data?.signedUrl) window.open(data.signedUrl, '_blank')
-    })
-
-    row.querySelector('.btn-copy').addEventListener('click', async () => {
-      const { data } = await supabase.storage.from('health-records').createSignedUrl(f.path, 3600)
-      if (data?.signedUrl) {
-        await navigator.clipboard.writeText(data.signedUrl)
-        alert('Share link copied (valid for 1 hour).')
+      if (!filtered.length) {
+        filesContainer.innerHTML = `<div class="p-6 text-ink-600 text-sm">No files found.</div>`
+        return
       }
-    })
 
-    row.querySelector('.btn-del').addEventListener('click', async () => {
-      if (!confirm('Delete this file?')) return
-      await supabase.storage.from('health-records').remove([f.path])
-      await supabase.from('files').delete().eq('id', f.id)
-      allFiles = allFiles.filter(x => x.id !== f.id)
-      renderFiles(allFiles)
-    })
-  }
-}
+      for (const f of filtered) {
+        const type = extToType(f.name)
+        const row = document.createElement('div')
+        row.className = 'flex items-center justify-between p-3 hover:bg-ink-50'
+        row.innerHTML = `
+          <div class="flex items-center min-w-0">
+            ${fileIcon(type)}
+            <div class="min-w-0">
+              <div class="font-medium truncate max-w-[52vw]">${f.name}</div>
+              <div class="text-xs text-ink-600">${humanKB(f.size)} • ${new Date(f.created_at).toLocaleString()}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn-open px-3 py-1.5 rounded-lg bg-ink-900 text-white text-sm hover:bg-ink-800" data-path="${f.path}">Open</button>
+            <button class="btn-copy px-3 py-1.5 rounded-lg border border-ink-300 text-sm hover:bg-ink-100" data-path="${f.path}">Copy link</button>
+            <button class="btn-del px-3 py-1.5 rounded-lg bg-danger-600 text-white text-sm hover:opacity-90" data-id="${f.id}" data-path="${f.path}">Delete</button>
+          </div>
+        `
+        filesContainer.appendChild(row)
+      }
 
+      // Wire actions
+      document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
+        const path = e.currentTarget.getAttribute('data-path')
+        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60) // 1 hour
+        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+      }))
+
+      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
+        const path = e.currentTarget.getAttribute('data-path')
+        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
+        if (data?.signedUrl) {
+          await navigator.clipboard.writeText(data.signedUrl)
+          alert('Share link copied (valid for 1 hour).')
+        }
+      }))
+
+      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id')
+        const path = e.currentTarget.getAttribute('data-path')
+        if (!confirm('Delete this file?')) return
+
+        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
+        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
+
+        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
+        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
+
+        allFiles = allFiles.filter(x => x.id !== id)
+        renderFiles(allFiles)
+      }))
+    }
 
     // Search & filter wiring
     searchInput.addEventListener('input', () => renderFiles(allFiles))
