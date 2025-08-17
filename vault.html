@@ -135,8 +135,6 @@
     <!-- Files List -->
     <section class="rounded-xl2 shadow-soft bg-white border border-ink-100">
       <div class="p-5 border-b border-ink-100 flex items-center justify-between">
-        console.log("Files loaded from Supabase:", data)
-
         <h3 class="text-lg font-semibold">My files</h3>
         <span id="fileCount" class="text-sm text-ink-700"></span>
       </div>
@@ -180,7 +178,7 @@
 
     // Auth handlers
     loginBtn.addEventListener('click', async () => {
-      const redirectTo = window.location.origin
+      const redirectTo = `${window.location.origin}/Cloud-Health-Record-Vault/vault.html`
       await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
     })
     logoutBtn.addEventListener('click', async () => {
