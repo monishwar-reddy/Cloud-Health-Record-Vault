@@ -328,58 +328,41 @@
         `
         filesContainer.appendChild(row)
       }
-      const loginBtn = document.getElementById("login-btn");
-      loginBtn.addEventListener("click", () => {
-        alert("Login button clicked ✅");
-        // your login logic here...
-      });
-        filesContainer.addEventListener('click', async (e) => {
-      const target = e.target.closest('button')
-      if (!target) return
+   document.addEventListener("click", async (e) => {
+    const target = e.target.closest("button"); // detect button clicks
+    if (!target) return;
 
-      // Copy
-      if (target.classList.contains('btn-copy')) {
-        const path = target.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
-        if (data?.signedUrl) {
-          await navigator.clipboard.writeText(data.signedUrl)
-          alert('Share link copied (valid for 1 hour).')
-        }
-      }
-
-      // Delete
-      if (target.classList.contains('btn-del')) {
-        const id = target.getAttribute('data-id')
-        const path = target.getAttribute('data-path')
-        if (!confirm('Delete this file?')) return
-
-        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-        if (sErr) {
-          alert('Delete failed (storage): ' + sErr.message)
-          return
-        }
-
-        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-        if (dErr) {
-          alert('Delete failed (db): ' + dErr.message)
-          return
-        }
-
-        allFiles = allFiles.filter(x => x.id !== id)
-        renderFiles(allFiles)
-      }
-    })
-
-    // Example: load files after login
-    async function loadFiles() {
-      const { data, error } = await supabase.from('files').select('*').order('created_at', { ascending: false })
-      if (!error) {
-        allFiles = data
-        renderFiles(allFiles)
-      }
+    // Login button
+    if (target.id === "login-btn") {
+      e.preventDefault();
+      console.log("Login clicked");
+      // your login code here
     }
 
-    loadFiles()
+    // Copy button
+    if (target.classList.contains("btn-copy")) {
+      e.preventDefault();
+      const path = target.getAttribute("data-path");
+      console.log("Copy file:", path);
+      // copy file code
+    }
+
+    // Open button
+    if (target.classList.contains("btn-open")) {
+      e.preventDefault();
+      const path = target.getAttribute("data-path");
+      console.log("Open file:", path);
+      // open file code
+    }
+
+    // Delete button
+    if (target.classList.contains("btn-delete")) {
+      e.preventDefault();
+      const path = target.getAttribute("data-path");
+      console.log("Delete file:", path);
+      // delete file code
+    }
+  });
   </script>
 </body>
 </html>
