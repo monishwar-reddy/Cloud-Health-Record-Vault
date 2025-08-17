@@ -332,6 +332,7 @@
       // Wire actions
       // OPEN
 
+
       document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
         const path = e.currentTarget.getAttribute('data-path')
         const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
