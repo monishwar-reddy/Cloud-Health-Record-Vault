@@ -158,21 +158,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-   <script>
-      document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
-  e.preventDefault();
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-  });
-
-  if (error) {
-    console.error("Login error:", error.message);
-  } else {
-    console.log("Redirecting to Google…");
-  }
-});
-   <script>
     // UI refs
     const loginBtn = document.getElementById('loginBtn')
     const logoutBtn = document.getElementById('logoutBtn')
@@ -342,34 +328,46 @@
         `
         filesContainer.appendChild(row)
       }
-   document.addEventListener("click", async (e) => {
-    const target = e.target.closest("button"); // detect button clicks
-    if (!target) return;
 
-    // Copy button
-    if (target.classList.contains("btn-copy")) {
-      e.preventDefault();
-      const path = target.getAttribute("data-path");
-      console.log("Copy file:", path);
-      // copy file code
+      // Wire actions
+      // OPEN
+
+      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
+        const path = e.currentTarget.getAttribute('data-path')
+        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
+        if (data?.signedUrl) {
+          await navigator.clipboard.writeText(data.signedUrl)
+          alert('Share link copied (valid for 1 hour).')
+        }
+      }))
+
+      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id')
+        const path = e.currentTarget.getAttribute('data-path')
+        if (!confirm('Delete this file?')) return
+
+        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
+        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
+
+        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
+        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
+
+        allFiles = allFiles.filter(x => x.id !== id)
+        renderFiles(allFiles)
+      }))
     }
 
-    // Open button
-    if (target.classList.contains("btn-open")) {
-      e.preventDefault();
-      const path = target.getAttribute("data-path");
-      console.log("Open file:", path);
-      // open file code
-    }
+    // Search & filter wiring
+    searchInput.addEventListener('input', () => renderFiles(allFiles))
+    typeFilter.addEventListener('change', () => renderFiles(allFiles))
 
-    // Delete button
-    if (target.classList.contains("btn-delete")) {
-      e.preventDefault();
-      const path = target.getAttribute("data-path");
-      console.log("Delete file:", path);
-      // delete file code
-    }
-  });
+    // Initialize session on load
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      currentUser = session?.user || null
+      updateHeader()
+      if (currentUser) await loadFiles()
+    })()
   </script>
 </body>
 </html>
