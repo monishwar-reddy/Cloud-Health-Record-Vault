@@ -335,51 +335,31 @@ uploadBtn.addEventListener('click', async () => {
 
       // Wire actions
       // OPEN
-filesContainer.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('btn-open')) {
-    const path = e.target.dataset.path;
-    try {
-      const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600);
-      if (error) throw error;
-      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-    } catch (err) {
-      console.error("Open failed:", err);
-      alert("Could not open file: " + err.message);
-    }
-  }
+<div id="button-container">
+  <button data-action="copy">Copy</button>
+  <button data-action="delete">Delete</button>
+  <button data-action="open">Open</button>
+</div>
 
-  if (e.target.classList.contains('btn-copy')) {
-    const path = e.target.dataset.path;
-    try {
-      const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600);
-      if (error) throw error;
-      if (data?.signedUrl) {
-        await navigator.clipboard.writeText(data.signedUrl);
-        alert('Share link copied (valid for 1 hour).');
-      }
-    } catch (err) {
-      console.error("Copy failed:", err);
-      alert("Could not copy link: " + err.message);
-    }
-  }
+<script>
+document.getElementById("button-container").addEventListener("click", function(event) {
+  const action = event.target.dataset.action;
+  if (!action) return; // Ignore clicks that aren’t buttons
 
-  if (e.target.classList.contains('btn-del')) {
-    const id = e.target.dataset.id;
-    const path = e.target.dataset.path;
-    if (!confirm('Delete this file?')) return;
-    try {
-      const { error: sErr } = await supabase.storage.from('health-records').remove([path]);
-      if (sErr) throw sErr;
-      const { error: dErr } = await supabase.from('files').delete().eq('id', id);
-      if (dErr) throw dErr;
-      allFiles = allFiles.filter(x => x.id !== id);
-      renderFiles(allFiles);
-    } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Delete failed: " + err.message);
-    }
+  if (action === "copy") {
+    console.log("Copy clicked");
+    // your copy logic
+  } 
+  else if (action === "delete") {
+    console.log("Delete clicked");
+    // your delete logic
+  } 
+  else if (action === "open") {
+    console.log("Open clicked");
+    // your open logic
   }
 });
+
     }
 
     // Search & filter wiring
