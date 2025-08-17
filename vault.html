@@ -193,6 +193,12 @@
       updateHeader()
       if (currentUser) await loadFiles()
     })
+    setInterval(async () => {
+       const { data: { session } } = await supabase.auth.getSession();
+       currentUser = session?.user || null;
+       updateHeader();
+    }, 5 * 60 * 1000); // every 5 minutes
+
 
     async function getUser() {
       const { data } = await supabase.auth.getUser()
@@ -213,37 +219,40 @@
     }
 
     // Upload logic with progress (client-side approximation)
-    uploadBtn.addEventListener('click', async () => {
-      const files = fileInput.files
-      if (!currentUser) return alert('Please sign in first.')
-      if (!files || !files.length) return alert('Choose file(s) first.')
+uploadBtn.addEventListener('click', async () => {
+  const files = fileInput.files;
+  if (!currentUser) return alert('Please sign in first.');
+  if (!files || !files.length) return alert('Choose file(s) first.');
 
-      progressWrap.classList.remove('hidden')
-      progressBar.style.width = '0%'
-      progressText.textContent = `Uploading ${files.length} file(s)…`
+  progressWrap.classList.remove('hidden');
+  progressBar.style.width = '0%';
+  progressText.textContent = `Uploading ${files.length} file(s)…`;
 
-      let uploaded = 0
-      for (const f of files) {
-        const path = `${currentUser.id}/${Date.now()}_${f.name}`
-        const { error: upErr } = await supabase.storage.from('health-records').upload(path, f)
-        if (upErr) { console.error(upErr); alert('Upload error: '+ upErr.message); continue }
+  let uploaded = 0;
 
-        await supabase.from('files').insert({
-          user_id: currentUser.id,
-          name: f.name,
-          size: f.size,
-          path
-        })
-        uploaded++
-        const pct = Math.round((uploaded / files.length) * 100)
-        progressBar.style.width = pct + '%'
-        progressText.textContent = `Uploaded ${uploaded}/${files.length}`
-      }
+  for (const f of files) {
+    const path = `${currentUser.id}/${Date.now()}_${f.name}`;
+    try {
+      const { error: upErr } = await supabase.storage.from('health-records').upload(path, f);
+      if (upErr) throw upErr;
 
-      fileInput.value = ''
-      setTimeout(()=>{ progressWrap.classList.add('hidden') }, 600)
-      await loadFiles()
-    })
+      await supabase.from('files').insert({ user_id: currentUser.id, name: f.name, size: f.size, path });
+      uploaded++;
+
+      const pct = Math.round((uploaded / files.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressText.textContent = `Uploaded ${uploaded}/${files.length}`;
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Upload failed: " + err.message);
+    }
+  }
+
+  fileInput.value = '';
+  setTimeout(() => { progressWrap.classList.add('hidden') }, 600);
+  await loadFiles();
+});
+
 
     async function loadFiles() {
       const user = await getUser()
@@ -268,10 +277,11 @@
 
     function fileIcon(type) {
       const base = 'inline-block align-middle mr-2 h-5 w-5 rounded-sm'
-      if (type === 'pdf') return `<span class="${base} bg-danger-600"></span>`
-      if (type === 'image') return `<span class="${base} bg-accent-500"></span>`
-      if (type === 'doc') return `<span class="${base} bg-ink-700"></span>`
-      return `<span class="${base} bg-ink-300"></span>`
+        if (type === 'pdf') return `<span class="${base} bg-danger-600"></span>`
+        if (type === 'image') return `<span class="${base} bg-accent-500"></span>`
+        if (type === 'doc') return `<span class="${base} bg-ink-700"></span>`
+        return `<span class="${base} bg-ink-300"></span>`
+
     }
 
     function humanKB(bytes) {
@@ -325,35 +335,51 @@
 
       // Wire actions
       // OPEN
-document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60) // 1 hour
-        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
-      }))
+filesContainer.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('btn-open')) {
+    const path = e.target.dataset.path;
+    try {
+      const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600);
+      if (error) throw error;
+      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    } catch (err) {
+      console.error("Open failed:", err);
+      alert("Could not open file: " + err.message);
+    }
+  }
 
-      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
-        if (data?.signedUrl) {
-          await navigator.clipboard.writeText(data.signedUrl)
-          alert('Share link copied (valid for 1 hour).')
-        }
-      }))
+  if (e.target.classList.contains('btn-copy')) {
+    const path = e.target.dataset.path;
+    try {
+      const { data, error } = await supabase.storage.from('health-records').createSignedUrl(path, 3600);
+      if (error) throw error;
+      if (data?.signedUrl) {
+        await navigator.clipboard.writeText(data.signedUrl);
+        alert('Share link copied (valid for 1 hour).');
+      }
+    } catch (err) {
+      console.error("Copy failed:", err);
+      alert("Could not copy link: " + err.message);
+    }
+  }
 
-      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
-        const id = e.currentTarget.getAttribute('data-id')
-        const path = e.currentTarget.getAttribute('data-path')
-        if (!confirm('Delete this file?')) return
-
-        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
-
-        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
-
-        allFiles = allFiles.filter(x => x.id !== id)
-        renderFiles(allFiles)
-      }))
+  if (e.target.classList.contains('btn-del')) {
+    const id = e.target.dataset.id;
+    const path = e.target.dataset.path;
+    if (!confirm('Delete this file?')) return;
+    try {
+      const { error: sErr } = await supabase.storage.from('health-records').remove([path]);
+      if (sErr) throw sErr;
+      const { error: dErr } = await supabase.from('files').delete().eq('id', id);
+      if (dErr) throw dErr;
+      allFiles = allFiles.filter(x => x.id !== id);
+      renderFiles(allFiles);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Delete failed: " + err.message);
+    }
+  }
+});
     }
 
     // Search & filter wiring
