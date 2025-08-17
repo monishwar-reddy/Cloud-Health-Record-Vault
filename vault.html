@@ -301,25 +301,37 @@
   }
 
   // ✅ ONE listener for all file action buttons
-  filesContainer.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("btn-open")) {
-      const { data } = await supabase.storage.from('health-records').createSignedUrl(e.target.dataset.path, 3600)
-      if (data?.signedUrl) window.open(data.signedUrl,"_blank")
+  // ✅ ONE listener for all file action buttons (fixed with closest)
+filesContainer.addEventListener("click", async (e) => {
+  const openBtn = e.target.closest(".btn-open");
+  const copyBtn = e.target.closest(".btn-copy");
+  const delBtn  = e.target.closest(".btn-del");
+
+  if (openBtn) {
+    const { data } = await supabase.storage
+      .from('health-records')
+      .createSignedUrl(openBtn.dataset.path, 3600);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  }
+
+  if (copyBtn) {
+    const { data } = await supabase.storage
+      .from('health-records')
+      .createSignedUrl(copyBtn.dataset.path, 3600);
+    if (data?.signedUrl) {
+      await navigator.clipboard.writeText(data.signedUrl);
+      alert("Link copied!");
     }
-    if (e.target.classList.contains("btn-copy")) {
-      const { data } = await supabase.storage.from('health-records').createSignedUrl(e.target.dataset.path, 3600)
-      if (data?.signedUrl) {
-        await navigator.clipboard.writeText(data.signedUrl)
-        alert("Link copied!")
-      }
-    }
-    if (e.target.classList.contains("btn-del")) {
-      if (!confirm("Delete this file?")) return
-      await supabase.storage.from('health-records').remove([e.target.dataset.path])
-      await supabase.from('files').delete().eq('id',e.target.dataset.id)
-      await loadFiles()
-    }
-  })
+  }
+
+  if (delBtn) {
+    if (!confirm("Delete this file?")) return;
+    await supabase.storage.from('health-records').remove([delBtn.dataset.path]);
+    await supabase.from('files').delete().eq('id', delBtn.dataset.id);
+    await loadFiles();
+  }
+});
+
 
   // ✅ Filters always active
   searchInput.addEventListener('input', ()=>renderFiles(allFiles))
