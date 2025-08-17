@@ -328,6 +328,11 @@
         `
         filesContainer.appendChild(row)
       }
+      const loginBtn = document.getElementById("login-btn");
+      loginBtn.addEventListener("click", () => {
+        alert("Login button clicked ✅");
+        // your login logic here...
+      });
         filesContainer.addEventListener('click', async (e) => {
       const target = e.target.closest('button')
       if (!target) return
