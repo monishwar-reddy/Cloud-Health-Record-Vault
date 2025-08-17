@@ -158,7 +158,21 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inptb3pwaWd3cGZpaWJ5a2l4ZGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyNDg1NDAsImV4cCI6MjA3MDgyNDU0MH0.kgMCNatoRbIhnzTNF3TDuf_edrHOt4rVMcGnPtXPwFI'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+   <script>
+      document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
+  e.preventDefault();
 
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+  });
+
+  if (error) {
+    console.error("Login error:", error.message);
+  } else {
+    console.log("Redirecting to Google…");
+  }
+});
+   <script>
     // UI refs
     const loginBtn = document.getElementById('loginBtn')
     const logoutBtn = document.getElementById('logoutBtn')
@@ -331,13 +345,6 @@
    document.addEventListener("click", async (e) => {
     const target = e.target.closest("button"); // detect button clicks
     if (!target) return;
-
-    // Login button
-    if (target.id === "login-btn") {
-      e.preventDefault();
-      console.log("Login clicked");
-      // your login code here
-    }
 
     // Copy button
     if (target.classList.contains("btn-copy")) {
