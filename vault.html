@@ -198,6 +198,13 @@
        currentUser = session?.user || null;
        updateHeader();
     }, 5 * 60 * 1000); // every 5 minutes
+    // Refresh session when tab regains focus
+window.addEventListener("focus", async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  currentUser = session?.user || null;
+  updateHeader();
+  if (currentUser) await loadFiles();
+});
 
 
     async function getUser() {
@@ -332,35 +339,47 @@
 
       // Wire actions
       // OPEN
-document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60) // 1 hour
-        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
-      }))
+      const fileCount = document.getElementById('fileCount')
+        // Event delegation for file actions (Open, Copy, Delete)
+filesContainer.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
 
-      document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
-        const path = e.currentTarget.getAttribute('data-path')
-        const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
-        if (data?.signedUrl) {
-          await navigator.clipboard.writeText(data.signedUrl)
-          alert('Share link copied (valid for 1 hour).')
-        }
-      }))
+  // OPEN
+  if (btn.classList.contains('btn-open')) {
+    const path = btn.dataset.path;
+    const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  }
 
-      document.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', async (e) => {
-        const id = e.currentTarget.getAttribute('data-id')
-        const path = e.currentTarget.getAttribute('data-path')
-        if (!confirm('Delete this file?')) return
+  // COPY
+  if (btn.classList.contains('btn-copy')) {
+    const path = btn.dataset.path;
+    const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60);
+    if (data?.signedUrl) {
+      await navigator.clipboard.writeText(data.signedUrl);
+      alert("Share link copied (valid for 1 hour).");
+    }
+  }
 
-        const { error: sErr } = await supabase.storage.from('health-records').remove([path])
-        if (sErr) { alert('Delete failed (storage): '+sErr.message); return }
+  // DELETE
+  if (btn.classList.contains('btn-del')) {
+    const id = btn.dataset.id;
+    const path = btn.dataset.path;
+    if (!confirm("Delete this file?")) return;
 
-        const { error: dErr } = await supabase.from('files').delete().eq('id', id)
-        if (dErr) { alert('Delete failed (db): '+dErr.message); return }
+    const { error: sErr } = await supabase.storage.from("health-records").remove([path]);
+    if (sErr) return alert("Delete failed (storage): " + sErr.message);
 
-        allFiles = allFiles.filter(x => x.id !== id)
-        renderFiles(allFiles)
-      }))
+    const { error: dErr } = await supabase.from("files").delete().eq("id", id);
+    if (dErr) return alert("Delete failed (db): " + dErr.message);
+
+    allFiles = allFiles.filter(f => f.id !== id);
+    renderFiles(allFiles);
+  }
+});
+
+      
     }
 
     // Search & filter wiring
