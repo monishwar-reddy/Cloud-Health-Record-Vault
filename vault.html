@@ -176,9 +176,9 @@
     let currentUser = null
     let allFiles = []
 
-    // Auth handlers
+    // Auth
     loginBtn.addEventListener('click', async () => {
-      const redirectTo = `${window.location.origin}/Cloud-Health-Record-Vault/vault.html`
+      const redirectTo = window.location.href
       await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } })
     })
     logoutBtn.addEventListener('click', async () => {
@@ -187,23 +187,11 @@
       updateHeader()
       renderFiles([])
     })
-
     supabase.auth.onAuthStateChange(async (event, session) => {
       currentUser = session?.user || null
       updateHeader()
       if (currentUser) await loadFiles()
     })
-    setInterval(async () => {
-       const { data: { session } } = await supabase.auth.getSession();
-       currentUser = session?.user || null;
-       updateHeader();
-    }, 5 * 60 * 1000); // every 5 minutes
-
-
-    async function getUser() {
-      const { data } = await supabase.auth.getUser()
-      return data.user
-    }
 
     function updateHeader() {
       if (currentUser) {
@@ -218,50 +206,35 @@
       }
     }
 
-    // Upload logic with progress (client-side approximation)
-uploadBtn.addEventListener('click', async () => {
-  const files = fileInput.files;
-  if (!currentUser) return alert('Please sign in first.');
-  if (!files || !files.length) return alert('Choose file(s) first.');
+    // Upload
+    uploadBtn.addEventListener('click', async () => {
+      const files = fileInput.files
+      if (!currentUser) return alert("Sign in first")
+      if (!files.length) return alert("Pick files first")
 
-  progressWrap.classList.remove('hidden');
-  progressBar.style.width = '0%';
-  progressText.textContent = `Uploading ${files.length} file(s)…`;
+      progressWrap.classList.remove('hidden')
+      progressBar.style.width = '0%'
+      progressText.textContent = `Uploading ${files.length} file(s)…`
 
-  let uploaded = 0;
-
-  for (const f of files) {
-    const path = `${currentUser.id}/${Date.now()}_${f.name}`;
-    try {
-      const { error: upErr } = await supabase.storage.from('health-records').upload(path, f);
-      if (upErr) throw upErr;
-
-      await supabase.from('files').insert({ user_id: currentUser.id, name: f.name, size: f.size, path });
-      uploaded++;
-
-      const pct = Math.round((uploaded / files.length) * 100);
-      progressBar.style.width = pct + '%';
-      progressText.textContent = `Uploaded ${uploaded}/${files.length}`;
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("Upload failed: " + err.message);
-    }
-  }
-
-  fileInput.value = '';
-  setTimeout(() => { progressWrap.classList.add('hidden') }, 600);
-  await loadFiles();
-});
-
+      let uploaded = 0
+      for (const f of files) {
+        const path = `${currentUser.id}/${Date.now()}_${f.name}`
+        try {
+          const { error } = await supabase.storage.from('health-records').upload(path, f)
+          if (error) throw error
+          await supabase.from('files').insert({ user_id: currentUser.id, name: f.name, size: f.size, path })
+          uploaded++
+          progressBar.style.width = `${Math.round((uploaded/files.length)*100)}%`
+          progressText.textContent = `Uploaded ${uploaded}/${files.length}`
+        } catch (err) { alert("Upload failed: " + err.message) }
+      }
+      fileInput.value = ''
+      setTimeout(() => progressWrap.classList.add('hidden'), 600)
+      await loadFiles()
+    })
 
     async function loadFiles() {
-      const user = await getUser()
-      if (!user) return
-      const { data, error } = await supabase
-        .from('files')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+      const { data, error } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at',{ascending:false})
       if (error) { console.error(error); return }
       allFiles = data || []
       renderFiles(allFiles)
@@ -270,57 +243,48 @@ uploadBtn.addEventListener('click', async () => {
     function extToType(name) {
       const n = name.toLowerCase()
       if (n.endsWith('.pdf')) return 'pdf'
-      if (n.endsWith('.jpg') || n.endsWith('.jpeg') || n.endsWith('.png') || n.endsWith('.webp')) return 'image'
-      if (n.endsWith('.doc') || n.endsWith('.docx')) return 'doc'
+      if (/\.(jpg|jpeg|png|webp)$/i.test(n)) return 'image'
+      if (/\.(doc|docx)$/i.test(n)) return 'doc'
       return 'other'
     }
 
     function fileIcon(type) {
-      const base = 'inline-block align-middle mr-2 h-5 w-5 rounded-sm'
-        if (type === 'pdf') return `<span class="${base} bg-danger-600"></span>`
-        if (type === 'image') return `<span class="${base} bg-accent-500"></span>`
-        if (type === 'doc') return `<span class="${base} bg-ink-700"></span>`
-        return `<span class="${base} bg-ink-300"></span>`
-
+      const base = 'inline-block mr-2 h-5 w-5 rounded-sm'
+      if (type==='pdf') return `<span class="${base} bg-danger-600"></span>`
+      if (type==='image') return `<span class="${base} bg-accent-500"></span>`
+      if (type==='doc') return `<span class="${base} bg-ink-700"></span>`
+      return `<span class="${base} bg-ink-300"></span>`
     }
 
     function humanKB(bytes) {
-      if (!bytes && bytes !== 0) return ''
-      if (bytes < 1024) return `${bytes} B`
-      const kb = bytes / 1024
-      if (kb < 1024) return `${kb.toFixed(1)} KB`
-      const mb = kb / 1024
-      return `${mb.toFixed(1)} MB`
+      if (bytes < 1024) return bytes+" B"
+      const kb = bytes/1024
+      if (kb < 1024) return kb.toFixed(1)+" KB"
+      return (kb/1024).toFixed(1)+" MB"
     }
 
     function renderFiles(list) {
-      // Apply search + filter
-      const q = (searchInput.value || '').toLowerCase()
+      const q = searchInput.value.toLowerCase()
       const filter = typeFilter.value
-      const filtered = list.filter(f => {
+      const filtered = list.filter(f=>{
         const t = extToType(f.name)
-        const byType = (filter === 'all') || (t === filter)
-        const byQuery = f.name.toLowerCase().includes(q)
-        return byType && byQuery
+        return (filter==="all"||t===filter) && f.name.toLowerCase().includes(q)
       })
-
       filesContainer.innerHTML = ''
       fileCount.textContent = `${filtered.length} file(s)`
-
       if (!filtered.length) {
         filesContainer.innerHTML = `<div class="p-6 text-ink-600 text-sm">No files found.</div>`
         return
       }
-
-      for (const f of filtered) {
+      filtered.forEach(f=>{
         const type = extToType(f.name)
         const row = document.createElement('div')
-        row.className = 'flex items-center justify-between p-3 hover:bg-ink-50'
+        row.className = "flex items-center justify-between p-3 hover:bg-ink-50"
         row.innerHTML = `
           <div class="flex items-center min-w-0">
             ${fileIcon(type)}
             <div class="min-w-0">
-              <div class="font-medium truncate max-w-[52vw]">${f.name}</div>
+              <div class="font-medium truncate max-w-[50vw]">${f.name}</div>
               <div class="text-xs text-ink-600">${humanKB(f.size)} • ${new Date(f.created_at).toLocaleString()}</div>
             </div>
           </div>
@@ -328,48 +292,42 @@ uploadBtn.addEventListener('click', async () => {
             <button class="btn-open px-3 py-1.5 rounded-lg bg-ink-900 text-white text-sm hover:bg-ink-800" data-path="${f.path}">Open</button>
             <button class="btn-copy px-3 py-1.5 rounded-lg border border-ink-300 text-sm hover:bg-ink-100" data-path="${f.path}">Copy link</button>
             <button class="btn-del px-3 py-1.5 rounded-lg bg-danger-600 text-white text-sm hover:opacity-90" data-id="${f.id}" data-path="${f.path}">Delete</button>
-          </div>
-        `
+          </div>`
         filesContainer.appendChild(row)
-      }
+      })
 
-      // Wire actions
-      // OPEN
-<div id="button-container">
-  <button data-action="copy">Copy</button>
-  <button data-action="delete">Delete</button>
-  <button data-action="open">Open</button>
-</div>
-
-<script>
-document.getElementById("button-container").addEventListener("click", function(event) {
-  const action = event.target.dataset.action;
-  if (!action) return; // Ignore clicks that aren’t buttons
-
-  if (action === "copy") {
-    console.log("Copy clicked");
-    // your copy logic
-  } 
-  else if (action === "delete") {
-    console.log("Delete clicked");
-    // your delete logic
-  } 
-  else if (action === "open") {
-    console.log("Open clicked");
-    // your open logic
-  }
-});
-
+      // 🔹 wire up actions
+      filesContainer.querySelectorAll(".btn-open").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const { data } = await supabase.storage.from('health-records').createSignedUrl(btn.dataset.path, 3600)
+          if (data?.signedUrl) window.open(data.signedUrl,"_blank")
+        }
+      })
+      filesContainer.querySelectorAll(".btn-copy").forEach(btn=>{
+        btn.onclick = async ()=>{
+          const { data } = await supabase.storage.from('health-records').createSignedUrl(btn.dataset.path, 3600)
+          if (data?.signedUrl) {
+            await navigator.clipboard.writeText(data.signedUrl)
+            alert("Link copied!")
+          }
+        }
+      })
+      filesContainer.querySelectorAll(".btn-del").forEach(btn=>{
+        btn.onclick = async ()=>{
+          if (!confirm("Delete this file?")) return
+          await supabase.storage.from('health-records').remove([btn.dataset.path])
+          await supabase.from('files').delete().eq('id',btn.dataset.id)
+          await loadFiles()
+        }
+      })
     }
 
-    // Search & filter wiring
-    searchInput.addEventListener('input', () => renderFiles(allFiles))
-    typeFilter.addEventListener('change', () => renderFiles(allFiles))
+    searchInput.addEventListener('input', ()=>renderFiles(allFiles))
+    typeFilter.addEventListener('change', ()=>renderFiles(allFiles))
 
-    // Initialize session on load
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      currentUser = session?.user || null
+    ;(async ()=>{
+      const { data:{session} } = await supabase.auth.getSession()
+      currentUser = session?.user||null
       updateHeader()
       if (currentUser) await loadFiles()
     })()
