@@ -29,16 +29,10 @@
           },
           borderRadius: {
             xl2: '1.25rem'
-
           }
-
         }
       }
     }
-@keyframes slideDown {
-             from { opacity: 0; transform: translateY(-5px); }
-             to { opacity: 1; transform: translateY(0); }
-          }
   </script>
   <link rel="preconnect" href="https://esm.sh" />
 </head>
@@ -328,7 +322,6 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button class="btn-open px-3 py-1.5 rounded-lg bg-ink-900 text-white text-sm hover:bg-ink-800" data-path="${f.path}">Open</button>
             <button class="btn-copy px-3 py-1.5 rounded-lg border border-ink-300 text-sm hover:bg-ink-100" data-path="${f.path}">Copy link</button>
             <button class="btn-del px-3 py-1.5 rounded-lg bg-danger-600 text-white text-sm hover:opacity-90" data-id="${f.id}" data-path="${f.path}">Delete</button>
           </div>
@@ -338,34 +331,6 @@
 
       // Wire actions
       // OPEN
-document.querySelectorAll('.btn-open').forEach(btn => btn.addEventListener('click', async (e) => {
-  const path = e.currentTarget.getAttribute('data-path')
-  const row = e.currentTarget.closest('div')
-
-  const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
-  if (!data?.signedUrl) return
-
-  // remove any existing preview
-  const existing = row.parentElement.querySelector('.file-preview')
-  if (existing) existing.remove()
-
-  // create preview panel
-  const preview = document.createElement('div')
-  preview.className = "file-preview mt-2 p-3 bg-ink-50 border border-ink-200 rounded-lg col-span-full animate-[slideDown_0.3s_ease-out]"
-
-  // always show iframe when possible, otherwise just a link
-  preview.innerHTML = `
-    <div class="w-full">
-      <iframe src="${data.signedUrl}" class="w-full h-72 rounded border"></iframe>
-      <div class="mt-2 text-sm">
-        <a href="${data.signedUrl}" target="_blank" class="text-accent-600 underline">Open in new tab</a>
-      </div>
-    </div>
-  `
-
-  row.insertAdjacentElement('afterend', preview)
-}))
-
       document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
         const path = e.currentTarget.getAttribute('data-path')
         const { data } = await supabase.storage.from('health-records').createSignedUrl(path, 60 * 60)
