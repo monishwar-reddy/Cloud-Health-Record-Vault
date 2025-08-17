@@ -332,28 +332,38 @@
 
       // Wire actions
       // OPEN
-document.querySelectorAll('.btn-open').forEach(btn => 
-  btn.addEventListener('click', async (e) => {
-    e.preventDefault(); // make sure it doesn't mess with current page
-    e.stopPropagation(); // avoid bubbling issues
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('.btn-open').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      try {
+        const path = e.currentTarget.getAttribute('data-path');
+        if (!path) {
+          console.error("No data-path found on button");
+          return;
+        }
 
-    const path = e.currentTarget.getAttribute('data-path');
-    const { data, error } = await supabase
-      .storage
-      .from('health-records')
-      .createSignedUrl(path, 60 * 60); // valid 1 hour
+        const { data, error } = await supabase
+          .storage
+          .from('health-records')
+          .createSignedUrl(path, 60 * 60); // 1 hour
 
-    if (error) {
-      console.error("Error creating signed URL:", error);
-      return;
-    }
+        if (error) {
+          console.error("Error creating signed URL:", error.message);
+          return;
+        }
 
-    if (data?.signedUrl) {
-      // Open file in completely separate browsing context
-      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
-    }
-  })
-);
+        if (data?.signedUrl) {
+          window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+        } else {
+          console.error("Signed URL not returned.");
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    });
+  });
+});
+
 
       document.querySelectorAll('.btn-copy').forEach(btn => btn.addEventListener('click', async (e) => {
         const path = e.currentTarget.getAttribute('data-path')
