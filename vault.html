@@ -44,20 +44,17 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <!-- Logo + Title -->
       <div class="flex items-center gap-2">
-        <img src="app.png" alt="Logo" class="h-8 w-8"> <!-- smaller icon -->
+        <img src="app.png" alt="Logo" class="h-8 w-8">
         <div>
           <h1 class="text-lg font-semibold text-ink-900">Cloud Health Record Vault</h1>
           <p class="text-xs text-ink-600 -mt-0.5">Provider-agnostic • Patient self-access</p>
         </div>
       </div>
-
       <!-- Auth buttons -->
       <div class="flex items-center gap-3">
         <span id="userBadge" class="hidden text-sm text-ink-700"></span>
-        <button id="loginBtn" class="px-4 py-2 rounded-lg bg-ink-900 text-white hover:bg-ink-800">Sign in with
-          Google</button>
-        <button id="logoutBtn"
-          class="hidden px-4 py-2 rounded-lg border border-ink-300 text-ink-800 hover:bg-ink-100">Sign out</button>
+        <button id="loginBtn" class="px-4 py-2 rounded-lg bg-ink-900 text-white hover:bg-ink-800">Sign in with Google</button>
+        <button id="logoutBtn" class="hidden px-4 py-2 rounded-lg border border-ink-300 text-ink-800 hover:bg-ink-100">Sign out</button>
       </div>
     </div>
   </header>
@@ -72,12 +69,9 @@
             Your health records, unified. Secure. Always available.
           </h2>
           <p class="mt-3 text-ink-700">
-            Upload lab reports, prescriptions, scans, and share time-limited links with doctors. Built on Supabase free
-            tier.
+            Upload lab reports, prescriptions, scans, and share time-limited links with doctors. Built on Supabase free tier.
           </p>
-          <div class="mt-5 flex gap-3">
-
-          </div>
+          <div class="mt-5 flex gap-3"></div>
         </div>
         <div class="rounded-xl2 shadow-soft bg-white p-5 border border-ink-100">
           <div class="grid grid-cols-2 gap-3 text-center">
@@ -89,7 +83,6 @@
               <p class="text-xs text-ink-600">Share Links</p>
               <p class="text-lg font-semibold">1 hour</p>
             </div>
-
           </div>
         </div>
       </div>
@@ -161,6 +154,13 @@
 
   <!-- App Script -->
   <script type="module">
+    // Force reload if page is restored from bfcache (browser back/forward)
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
+
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     // TODO: Replace with your Supabase project values
@@ -208,7 +208,6 @@
       currentUser = session?.user || null;
       updateHeader();
     }, 5 * 60 * 1000); // every 5 minutes
-
 
     async function getUser() {
       const { data } = await supabase.auth.getUser()
@@ -288,7 +287,6 @@
       if (type === 'image') return `<span class="${base} bg-accent-500"></span>`
       if (type === 'doc') return `<span class="${base} bg-ink-700"></span>`
       return `<span class="${base} bg-ink-300"></span>`
-
     }
 
     function humanKB(bytes) {
@@ -299,8 +297,6 @@
       const mb = kb / 1024
       return `${mb.toFixed(1)} MB`
     }
-
-
 
     function renderFiles(list) {
       // Apply search + filter
@@ -384,13 +380,13 @@
     searchInput.addEventListener('input', () => renderFiles(allFiles))
     typeFilter.addEventListener('change', () => renderFiles(allFiles))
 
-      // Initialize session on load
-      (async () => {
-        const { data: { session } } = await supabase.auth.getSession()
-        currentUser = session?.user || null
-        updateHeader()
-        if (currentUser) await loadFiles()
-      })()
+    // Initialize session on load
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      currentUser = session?.user || null
+      updateHeader()
+      if (currentUser) await loadFiles()
+    })()
   </script>
 </body>
 
