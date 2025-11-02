@@ -33,8 +33,8 @@ Most existing portals are **provider-specific**, lack interoperability, and rest
 ---
 
 ### 🏗️ System Architecture  
-- **Frontend:** React.js / Vue.js  
-- **Backend:** Node.js / Python (Flask/FastAPI)   
+- **Frontend:** Html, Css, Js 
+- **Backend:** Python (Flask/FastAPI)   
 - **Storage:** supabase
 - **Authentication:** Self-Sovereign Identity (SSI) / OAuth  
 - **Deployment:** netlify 
