@@ -1,66 +1,63 @@
-🏥 Cloud Health Record Vault
-📘 Overview
+# 🏥 Cloud Health Record Vault  
 
-Cloud Health Record Vault is a secure, cloud-based platform designed to help patients upload, store, and access their medical records anytime, anywhere. It eliminates the hassle of scattered reports across hospitals and clinics by offering a unified, provider-agnostic vault that ensures both privacy and accessibility.
+### 📘 Overview  
+**Cloud Health Record Vault** is a secure, cloud-based platform that enables patients to **upload, store, and access their medical records anytime, anywhere**.  
+It solves the issue of scattered health data across hospitals, labs, and clinics by offering a **unified, provider-agnostic vault** with strong privacy and accessibility features.  
 
 Try it:
 https://gorgeous-crostata-e51b2a.netlify.app/
-🚀 Key Features
+---
 
-Cloud-Based Access – Upload and access records from any device, anytime.
+### 🚀 Key Features  
+- ☁️ **Cloud-Based Access** – Upload and retrieve records from any device, anytime.  
+- 🔒 **Secure Encryption** – Data is encrypted during upload, transfer, and storage.  
+- 🪪 **Self-Sovereign Identity (SSI)** – Passwordless, privacy-focused authentication.  
+- 🔗 **Instant Share Links** – Generate time-limited, revocable links for doctors or labs.  
+- 🧾 **Multi-Format Support** – Upload PDFs, images, reports, and diagnostic data.  
+- 💸 **Completely Free** – Runs on Firebase/Render free tiers with no subscription cost.  
 
-Secure Encryption – All files are encrypted during upload and storage.
+---
 
-Self-Sovereign Identity (SSI) – Passwordless, privacy-first authentication.
+### 🧠 Problem Statement  
+Health records are often **fragmented** across multiple providers, leading to difficulties in accessing important information during emergencies or consultations.  
+Most existing portals are **provider-specific**, lack interoperability, and restrict patient control.  
 
-Instant Share Links – Generate time-limited, revocable links for doctors or labs.
+---
 
-Multi-Format Uploads – Supports PDFs, images, lab reports, and more.
+### 🎯 Objectives  
+- Develop a **unified and patient-centric platform** for personal health records.  
+- Ensure **interoperability** via HL7 FHIR data standards.  
+- Guarantee compliance with **HIPAA** and **GDPR**.  
+- Empower patients with **granular data-sharing control** and transparency.  
 
-Free & Scalable – Built on Firebase/Render free tiers for zero-cost accessibility.
+---
 
-🧠 Problem Statement
+### 🏗️ System Architecture  
+- **Frontend:** React.js / Vue.js  
+- **Backend:** Node.js / Python (Flask/FastAPI)   
+- **Storage:** supabase
+- **Authentication:** Self-Sovereign Identity (SSI) / OAuth  
+- **Deployment:** netlify 
 
-Medical data today is fragmented across hospitals, labs, and clinics. During emergencies or routine consultations, patients struggle to retrieve critical health information. Existing portals are mostly provider-specific and lack interoperability.
+---
 
-🎯 Objectives
+### 🔐 Security Highlights  
+- 🔑 **AES-256 Encryption** for all stored records.   
+- 🧾 **Access Logs** to audit every record view or share.  
+- ⏱️ **Time-Limited Tokens** for temporary access links.  
 
-Create a unified, user-centric health data platform.
+---
 
-Implement FHIR (HL7) interoperability for cross-system compatibility.
+### 📊 Future Enhancements  
+- 🌐 Integration with **IoT health monitoring devices**.  
+- ⛓️ **Blockchain** for record provenance and tamper-proof history.  
+- 🤖 **AI-based summarization** of uploaded reports and lab results.  
+- 📱 Mobile app for on-the-go access and notifications.  
 
-Ensure compliance with HIPAA and GDPR standards.
+---
 
-Empower patients with full control over their data sharing and access.
+### 👨‍💻 Author  
+**Vardireddy Monishwar Reddy**  
 
-🏗️ Architecture
+---
 
-Frontend: React.js / Vue.js
-
-Backend: Node.js / Python (Flask/FastAPI)
-
-Database: Firebase Firestore
-
-Storage: Firebase Cloud Storage
-
-Auth: Self-Sovereign Identity (SSI) / OAuth
-
-Deployment: Render / Firebase Hosting
-
-🔐 Security Highlights
-
-Encrypted data storage (AES-256).
-
-Role-based access control (Patient / Doctor).
-
-Audit trail for every record access or share.
-
-Time-based token links for data sharing.
-
-📊 Future Enhancements
-
-Integration with IoT health monitoring devices.
-
-Blockchain-based data provenance and integrity tracking.
-
-AI-powered record summarization and anomaly detection.
